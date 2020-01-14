@@ -1,6 +1,24 @@
 import pygame
-# from main import SIZE
 from pygame import Color
+
+
+def percentage(limit, percent):
+    return int(limit / 100 * percent)
+
+
+def updater(obj_list, screen):
+    for obj in obj_list:
+        obj.update(screen)
+
+
+def emit_event_to_objects(obj_list, event):
+    res = list()
+    for obj in obj_list:
+        a = obj.event_handler(event)
+        if a is not None:
+            print(a)
+            res.append(a)
+    return res
 
 
 class Label:
@@ -10,7 +28,7 @@ class Label:
         self.fix = 20
         self.text_color = Color(0, 0, 0)
         try:
-            self.font = pygame.font.SysFont('mvboli', 34)
+            self.font = pygame.font.SysFont('Comic Sans MS', 34)
         except Exception as err:
             self.font = pygame.font.Font(None, 34)
 
@@ -25,10 +43,13 @@ class Label:
         self.text_color = color
 
     def set_font_size(self, size, fix=20):
-        self.font = pygame.font.SysFont('mvboli', size)
+        self.font = pygame.font.SysFont('Comic Sans MS', size)
         self.fix = fix
 
     def event_handler(self) -> None:
+        pass
+
+    def resize(self, difference_k):
         pass
 
     def update(self, screen):
@@ -60,7 +81,7 @@ class PushButton:
         self.background_color = Color(0, 0, 0)
 
         try:
-            self.font = pygame.font.SysFont('mvboli', 34)
+            self.font = pygame.font.SysFont('Comic Sans MS', 34)
         except Exception as err:
             self.font = pygame.font.Font(None, 34)
 
@@ -68,11 +89,14 @@ class PushButton:
         del self.handler
         self.handler = func
 
+    def resize(self, difference_k):
+        pass
+
     def set_text(self, text):
         self.text = text
 
     def set_font_size(self, size, fix=20):
-        self.font = pygame.font.SysFont('mvboli', size)
+        self.font = pygame.font.SysFont('Comic Sans MS', size)
         self.fix = fix
 
     def set_alpha(self, alpha):
@@ -115,8 +139,7 @@ class PushButton:
             flag2 = event.pos[1] in range(self.y, self.y + self.height + 1)
             if flag1 and flag2:
                 del flag1, flag2
-                self.handler()
-                return
+                return self.handler()
 
     def update(self, screen):
         button = pygame.Surface((self.width, self.height))
@@ -133,4 +156,4 @@ class PushButton:
             text = self.font.render(str(line), 1, self.text_color)
             text_w = text.get_width()
             text_h = text.get_height()
-            screen.blit(text, (self.x + 5, self.y + 5 + (text_h - self.fix) * i))
+            screen.blit(text, (self.x + 3, self.y + (text_h - self.fix) * i))
