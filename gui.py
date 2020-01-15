@@ -1,9 +1,6 @@
+from typing import Callable
+
 import pygame
-from pygame import Color
-
-
-def percentage(limit, percent):
-    return int(limit / 100 * percent)
 
 
 def updater(obj_list, screen):
@@ -11,149 +8,161 @@ def updater(obj_list, screen):
         obj.update(screen)
 
 
-def emit_event_to_objects(obj_list, event):
-    res = list()
+def objects_resizer(list_of_list_of_object, screen):
+    for list_of_objects in list_of_list_of_object:
+        for obj in list_of_objects:
+            obj.resize(screen)
+
+
+def emit_event_to_objects(obj_list, event) -> (int or None):
     for obj in obj_list:
         a = obj.event_handler(event)
         if a is not None:
             print(a)
-            res.append(a)
-    return res
+            return a
+    return None
 
 
+# All sizes stated in percent
 class Label:
-    def __init__(self, x, y):
-        self.text = ''
-        self.x, self.y = x, y
-        self.fix = 20
-        self.text_color = Color(0, 0, 0)
-        try:
-            self.font = pygame.font.SysFont('Comic Sans MS', 34)
-        except Exception as err:
-            self.font = pygame.font.Font(None, 34)
+    x: int = 0
+    y: int = 0
+    size_x: int = 0
+    size_y: int = 0
+    rect = None
+    text_color: pygame.Color = pygame.Color(0, 0, 0)
+    text: str = ''
+    font: str = 'Comic Sans MS'
+    font_size = None
+    fix: int = 0.1
 
-    def move(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, x: 'x in percent', y, size_x, size_y):
+        self.x, self.y, self.size_x, self.size_y = x, y, size_x, size_y
 
-    def set_text(self, text):
-        self.text = text
-
-    def set_text_color(self, color: Color):
-        self.text_color = color
-
-    def set_font_size(self, size, fix=20):
-        self.font = pygame.font.SysFont('Comic Sans MS', size)
-        self.fix = fix
-
-    def event_handler(self) -> None:
-        pass
-
-    def resize(self, difference_k):
-        pass
-
-    def update(self, screen):
-        lines = self.text.split('\n')
-        for i, line in enumerate(lines):
-            text = self.font.render(str(line), 1, self.text_color)
-            text_w = text.get_width()
-            text_h = text.get_height()
-            screen.blit(text, (self.x + 5, self.y + 5 + (text_h - self.fix) * i))
-
-
-class PushButton:
-    def __init__(self, left, top, width, height):
-        self.x, self.y, self.width, self.height = left, top, width, height
-        self.triggered = False
-
-        self.handler = lambda: None
-
-        self.fix = 20
-        self.text = ''
-        self.text_color = Color(0, 0, 0)
-
-        self.alpha = 100
-        self.contour = False
-        self.contour_fixed = False
-        self.contour_width = 1
-        self.contour_alpha = 200
-        self.contour_color = Color(0, 0, 0)
-        self.background_color = Color(0, 0, 0)
-
-        try:
-            self.font = pygame.font.SysFont('Comic Sans MS', 34)
-        except Exception as err:
-            self.font = pygame.font.Font(None, 34)
-
-    def set_handler(self, func):
-        del self.handler
-        self.handler = func
-
-    def resize(self, difference_k):
-        pass
-
-    def set_text(self, text):
-        self.text = text
-
-    def set_font_size(self, size, fix=20):
-        self.font = pygame.font.SysFont('Comic Sans MS', size)
-        self.fix = fix
-
-    def set_alpha(self, alpha):
-        self.alpha = alpha
-
-    def set_color(self, background_color: pygame.Color, text_color: pygame.Color) -> None:
-        self.background_color = background_color
-        self.text_color = text_color
-
-    def set_contour(self, color=Color(255, 0, 0), line_width=5, contour_fixed=False) -> None:
-        self.contour = True
-        self.contour_color = color
-        self.contour_fixed = contour_fixed
-        self.contour_width = line_width
-
-    def del_contour(self):
-        self.contour = None
-
-    def resize_by_text(self):
+    def __text_resize(self, button_size, fix):
         lines = self.text.split('\n')
         max_height = 0
         max_width = 0
-        for i, elem in enumerate(lines):
-            text = self.font.render(str(elem), 1, self.text_color)
-            max_height = max(text.get_height(), max_height)
-            max_width = max(text.get_width(), max_width)
-        self.width = max_width + 10
-        self.height = (max_height - self.fix) * len(lines) + self.fix
+        best = 1
+        for size in range(1, 1000):
+            font = pygame.font.SysFont('Comic Sans MS', size)
+            for i, elem in enumerate(lines):
+                text = font.render(str(elem), 1, self.text_color)
+                max_height = max(text.get_height(), max_height)
+                max_width = max(text.get_width(), max_width)
+            width = max_width + 10
+            height = max_height * len(lines) - fix * (len(lines) - 2)
+            if width >= button_size[0] or height >= button_size[1]:
+                self.font_size = best
+                return
+            best = size
 
-    def event_handler(self, event):
+    def resize(self, screen):
+        screen_height, screen_width = screen.get_height(), screen.get_width()
+        self.rect = (int(screen_width * self.x / 100),
+                     int(screen_height * self.y / 100),
+                     int(screen_width * self.size_x / 100),
+                     int(screen_height * self.size_y / 100),
+                     int(screen_height * self.fix / 100))
+        self.__text_resize((self.rect[2], self.rect[3]), self.rect[4])
+        return
+
+    def update(self, screen):
+        if self.rect is None or self.font_size is None:
+            self.resize(screen)
+        lines = self.text.split('\n')
+        font = pygame.font.SysFont(self.font, self.font_size)
+        for i, line in enumerate(lines):
+            text = font.render(str(line), 1, self.text_color)
+            text_w = text.get_width()
+            text_h = text.get_height()
+            screen.blit(text,
+                        (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
+
+    # stubs
+    @staticmethod
+    def event_handler(event) -> None:
+        return None
+
+
+class PushButton:
+    # Params of this class
+    x: int = 0
+    y: int = 0
+    size_x: int = 0
+    size_y: int = 0
+    rect = None
+    text_color: pygame.Color = pygame.Color(0, 0, 0)
+    background_color: pygame.Color = pygame.Color(255, 255, 255)
+    alpha: int = 200
+    text: str = ''
+    font: str = 'Comic Sans MS'
+    font_size = None
+    fix: int = 0.1
+    handler: Callable = lambda: None
+    in_handler: Callable = lambda x: None
+    # flags of this class:
+    triggered: bool = False
+
+    def __init__(self, x: 'x in percent', y, size_x, size_y):
+        self.x, self.y, self.size_x, self.size_y = x, y, size_x, size_y
+
+    def event_handler(self, event) -> handler:
         if event.type == pygame.MOUSEMOTION:
-            flag1 = event.pos[0] in range(self.x, self.x + self.width + 1)
-            flag2 = event.pos[1] in range(self.y, self.y + self.height + 1)
-            if flag1 and flag2:
+            if self.collide(event.pos):
                 self.triggered = True
             else:
                 self.triggered = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            flag1 = event.pos[0] in range(self.x, self.x + self.width + 1)
-            flag2 = event.pos[1] in range(self.y, self.y + self.height + 1)
-            if flag1 and flag2:
-                del flag1, flag2
+            if self.collide(event.pos):
                 return self.handler()
 
-    def update(self, screen):
-        button = pygame.Surface((self.width, self.height))
-        button.fill(self.background_color)
-        if self.contour:
-            if self.contour_fixed:
-                pygame.draw.rect(screen, self.contour_color, (self.x, self.y, self.width, self.height),
-                                 self.contour_width)
-            pygame.draw.rect(button, self.contour_color, (0, 0, self.width, self.height), self.contour_width)
-        button.set_alpha(min(self.alpha + 50, 255) if self.triggered else self.alpha)
-        screen.blit(button, (self.x, self.y))
+    def collide(self, mouse_pos):
+        return mouse_pos[0] in range(self.rect[0], self.rect[2] + self.rect[0]) and \
+               mouse_pos[1] in range(self.rect[1], self.rect[3] + self.rect[1])
+
+    def __text_resize(self, button_size, fix):
         lines = self.text.split('\n')
+        max_height = 0
+        max_width = 0
+        best = 1
+        for size in range(1, 1000):
+            font = pygame.font.SysFont('Comic Sans MS', size)
+            for i, elem in enumerate(lines):
+                text = font.render(str(elem), 1, self.text_color)
+                max_height = max(text.get_height(), max_height)
+                max_width = max(text.get_width(), max_width)
+            width = max_width + 10
+            height = max_height * len(lines) - fix * (len(lines) - 2)
+            if width >= button_size[0] or height >= button_size[1]:
+                self.font_size = best
+                return
+            best = size
+
+    def resize(self, screen):
+        screen_height, screen_width = screen.get_height(), screen.get_width()
+        self.rect = (int(screen_width * self.x / 100),
+                     int(screen_height * self.y / 100),
+                     int(screen_width * self.size_x / 100),
+                     int(screen_height * self.size_y / 100),
+                     int(screen_height * self.fix / 100))
+        self.__text_resize((self.rect[2], self.rect[3]), self.rect[4])
+        return
+
+    def update(self, screen):
+        if self.rect is None or self.font_size is None:
+            self.resize(screen)
+
+        button = pygame.Surface((self.rect[2], self.rect[3]))
+        button.fill(self.background_color)
+
+        button.set_alpha(min(self.alpha + 50, 255) if self.triggered else self.alpha)
+        screen.blit(button, (self.rect[0], self.rect[1]))
+        lines = self.text.split('\n')
+        font = pygame.font.SysFont(self.font, self.font_size)
         for i, line in enumerate(lines):
-            text = self.font.render(str(line), 1, self.text_color)
+            text = font.render(str(line), 1, self.text_color)
             text_w = text.get_width()
             text_h = text.get_height()
-            screen.blit(text, (self.x + 3, self.y + (text_h - self.fix) * i))
+            screen.blit(text,
+                        (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))

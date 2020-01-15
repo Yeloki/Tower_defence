@@ -1,0 +1,128 @@
+from test import *
+
+game_state = 0
+running = True
+# game_state == 0: main game menu
+# game_state == 1: main game settings
+# game_state == 2: map redactor
+# game_state == 3: new common game
+# game_state == 4: new game with uncommon settings
+
+# BASIC PARAMS AND THEIR VALUES
+screen_width = 1024
+screen_height = 720
+minimal_screen_width = 320
+minimal_screen_height = 240
+screen = pygame.display.set_mode((screen_width, screen_height), flags=RESIZABLE | DOUBLEBUF | HWSURFACE)
+clock = pygame.time.Clock()
+
+
+def terminate():
+    global running
+    running = False
+
+
+def menu() -> 'next game state':
+    global screen, screen_width, screen_height
+    background = pygame.image.load('images/background.jpg')
+    out_state = 0
+    objects = list()
+    name = Label(40, 5, 20, 10)
+
+    easy_game = PushButton(40, 5, 20, 10)
+    medium_game = PushButton(40, 17, 20, 10)
+    hard_game = PushButton(40, 29, 20, 10)
+    map_creator = PushButton(40, 41, 20, 10)
+    challenges = PushButton(40, 53, 20, 10)
+    settings = PushButton(40, 65, 20, 10)
+    exit_btn = PushButton(40, 77, 20, 10)
+
+    easy_game.background_color, easy_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
+    medium_game.background_color, medium_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
+    hard_game.background_color, hard_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
+    map_creator.background_color, map_creator.text_color = Color(255, 255, 255), Color(0, 0, 0)
+    challenges.background_color, challenges.text_color = Color(255, 255, 255), Color(0, 0, 0)
+    settings.background_color, settings.text_color = Color(255, 255, 255), Color(0, 0, 0)
+    exit_btn.background_color, exit_btn.text_color = Color(255, 255, 255), Color(0, 0, 0)
+
+    easy_game.alpha = 200
+    medium_game.alpha = 200
+    hard_game.alpha = 200
+    map_creator.alpha = 200
+    challenges.alpha = 200
+    settings.alpha = 200
+    exit_btn.alpha = 200
+
+    easy_game.text = 'New easy\ngame'
+    medium_game.text = 'New medium\ngame'
+    hard_game.text = 'New hard\ngame'
+    map_creator.text = 'Map creator'
+    challenges.text = 'Challenges'
+    settings.text = 'Settings'
+    exit_btn.text = 'Exit'
+    name.text = 'Onslaught'
+
+    easy_game.handler = lambda: 1
+    medium_game.handler = lambda: 2
+    hard_game.handler = lambda: 3
+    map_creator.handler = lambda: 4
+    challenges.handler = lambda: 5
+    settings.handler = lambda: 6
+    exit_btn.handler = lambda: 7
+
+    objects.append(easy_game)
+    objects.append(medium_game)
+    objects.append(hard_game)
+    objects.append(map_creator)
+    objects.append(challenges)
+    objects.append(settings)
+    objects.append(exit_btn)
+    objects.append(name)
+
+    for elem in objects:
+        elem.resize(screen)
+    result = list()
+    while out_state == 0 or out_state is None:
+        screen.blit(pygame.transform.scale(background, (screen_width, screen_height)), (0, 0))
+        for event in pygame.event.get():
+            if event.type == VIDEORESIZE:
+                screen_width, screen_height = event.size
+                screen = pygame.display.set_mode((screen_width, screen_height), flags=RESIZABLE | DOUBLEBUF | HWSURFACE)
+                objects_resizer((objects,), screen)
+            if event.type == pygame.QUIT:
+                quit(0)
+            if event.type == pygame.KEYDOWN:
+                pass
+            out_state = emit_event_to_objects(objects, event)
+        updater(objects, screen)
+
+        pygame.display.flip()
+    return out_state
+
+
+def game(level_of_difficult):
+    """
+    This function draw all game interface and objects
+    :param level_of_difficult: level of difficult of new game
+    :return: next game state
+    """
+    pass
+
+
+while running:
+    if game_state == 0:
+        game_state = menu()
+    if game_state == 1:  # New easy game
+        pass
+    if game_state == 2:  # New medium game
+        pass
+    if game_state == 3:  # New hard game
+        pass
+    if game_state == 4:  # Map creator
+        pass
+    if game_state == 5:  # challenges
+        pass
+    if game_state == 6:  # settings
+        pass
+    if game_state == 7:  # for exit
+        terminate()
