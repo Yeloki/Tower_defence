@@ -1,5 +1,11 @@
-from test import *
+from pygame import Color
+from pygame.locals import *
 
+# from test import *
+from game import Game
+from gui import *
+
+pygame.init()
 game_state = 0
 running = True
 # game_state == 0: main game menu
@@ -27,15 +33,15 @@ def menu() -> 'next game state':
     background = pygame.image.load('images/background.jpg')
     out_state = 0
     objects = list()
-    name = Label(40, 5, 20, 10)
-
-    easy_game = PushButton(40, 5, 20, 10)
-    medium_game = PushButton(40, 17, 20, 10)
-    hard_game = PushButton(40, 29, 20, 10)
-    map_creator = PushButton(40, 41, 20, 10)
-    challenges = PushButton(40, 53, 20, 10)
-    settings = PushButton(40, 65, 20, 10)
-    exit_btn = PushButton(40, 77, 20, 10)
+    x = 70
+    name = Label(x, 2, 20, 10)
+    easy_game = PushButton(x, 14, 20, 10)
+    medium_game = PushButton(x, 26, 20, 10)
+    hard_game = PushButton(x, 38, 20, 10)
+    map_creator = PushButton(x, 50, 20, 10)
+    challenges = PushButton(x, 62, 20, 10)
+    settings = PushButton(x, 74, 20, 10)
+    exit_btn = PushButton(x, 86, 20, 10)
 
     easy_game.background_color, easy_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
     medium_game.background_color, medium_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
@@ -53,9 +59,9 @@ def menu() -> 'next game state':
     settings.alpha = 200
     exit_btn.alpha = 200
 
-    easy_game.text = 'New easy\ngame'
-    medium_game.text = 'New medium\ngame'
-    hard_game.text = 'New hard\ngame'
+    easy_game.text = 'Easy mode'
+    medium_game.text = 'Medium mode'
+    hard_game.text = 'Hard mode'
     map_creator.text = 'Map creator'
     challenges.text = 'Challenges'
     settings.text = 'Settings'
@@ -65,10 +71,10 @@ def menu() -> 'next game state':
     easy_game.handler = lambda: 1
     medium_game.handler = lambda: 2
     hard_game.handler = lambda: 3
-    map_creator.handler = lambda: 4
-    challenges.handler = lambda: 5
-    settings.handler = lambda: 6
-    exit_btn.handler = lambda: 7
+    map_creator.handler = lambda: 5
+    challenges.handler = lambda: None
+    settings.handler = lambda: None
+    exit_btn.handler = lambda: 8
 
     objects.append(easy_game)
     objects.append(medium_game)
@@ -87,12 +93,13 @@ def menu() -> 'next game state':
         for event in pygame.event.get():
             if event.type == VIDEORESIZE:
                 screen_width, screen_height = event.size
-                screen = pygame.display.set_mode((screen_width, screen_height), flags=RESIZABLE | DOUBLEBUF | HWSURFACE)
-                objects_resizer((objects,), screen)
-            if event.type == pygame.QUIT:
-                quit(0)
-            if event.type == pygame.KEYDOWN:
-                pass
+                screen = pygame.display.set_mode((screen_width, screen_height), flags=DOUBLEBUF | HWSURFACE)
+                objects_resize(objects, screen)
+            if event.type == QUIT:
+                return 8
+            if event.type == KEYDOWN:
+                if event.key == K_F4 and event.mod in (512, 256):
+                    return 8
             out_state = emit_event_to_objects(objects, event)
         updater(objects, screen)
 
@@ -112,17 +119,15 @@ def game(level_of_difficult):
 while running:
     if game_state == 0:
         game_state = menu()
-    if game_state == 1:  # New easy game
+    if game_state in (1, 2, 3, 4):  # New game
+        game = Game(game_state, 'levels/common.txt')
+        game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
+        del game
+    if game_state == 5:  # Map creator
         pass
-    if game_state == 2:  # New medium game
+    if game_state == 6:  # challenges
         pass
-    if game_state == 3:  # New hard game
+    if game_state == 7:  # settings
         pass
-    if game_state == 4:  # Map creator
-        pass
-    if game_state == 5:  # challenges
-        pass
-    if game_state == 6:  # settings
-        pass
-    if game_state == 7:  # for exit
+    if game_state == 8:  # for exit
         terminate()

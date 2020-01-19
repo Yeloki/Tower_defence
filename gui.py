@@ -8,10 +8,9 @@ def updater(obj_list, screen):
         obj.update(screen)
 
 
-def objects_resizer(list_of_list_of_object, screen):
-    for list_of_objects in list_of_list_of_object:
-        for obj in list_of_objects:
-            obj.resize(screen)
+def objects_resize(list_of_objects, screen):
+    for obj in list_of_objects:
+        obj.resize(screen)
 
 
 def emit_event_to_objects(obj_list, event) -> (int or None):
@@ -166,3 +165,41 @@ class PushButton:
             text_h = text.get_height()
             screen.blit(text,
                         (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
+
+
+class GameMenu:
+    from time import time
+    buttons = list()
+    height = 15
+    rect = None
+
+    def __init__(self):
+        # next_wave = PushButton(0, 0, )
+        # self.buttons.append()
+        pass
+
+    def event_handler(self, event):
+
+        emit_event_to_objects(self.buttons, event)
+        return None
+
+    def resize(self, screen) -> None:
+        screen_height, screen_width = screen.get_height(), screen.get_width()
+        self.rect = (
+            int(screen_width * 0 / 100),
+            int(screen_height * (100 - self.height) / 100),
+            int(screen_width),
+            int(screen_height * self.height / 100)
+        )
+        return None
+
+    def update(self, screen):
+        if self.rect is None:
+            self.resize(screen)
+        menu = pygame.Surface(self.rect[2:])
+        menu.fill(pygame.Color('black'))
+        menu.set_alpha(80)
+        pass
+        updater(self.buttons, menu)
+        screen.blit(menu, (self.rect[0], self.rect[1]))
+        return None
