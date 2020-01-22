@@ -29,11 +29,12 @@ def terminate():
     running = False
 
 
-def menu() -> 'next game state':
+def menu() -> int:
     global screen, screen_width, screen_height
     background = pygame.image.load('images/background.jpg')
     out_state = 0
     objects = list()
+
     x = 70
     name = Label(x, 2, 20, 10)
     easy_game = PushButton(x, 14, 20, 10)

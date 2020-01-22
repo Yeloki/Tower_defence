@@ -43,8 +43,7 @@ class GameMap:
         else:
             pygame.draw.rect(screen, pygame.Color(255, 255, 255), pygame.Rect(*self.base_size))
             font = pygame.font.SysFont('Comic Sans MS', 32)
-            text = font.render(str(base_hp), 1, pygame.Color(0, 0, 0))
-            text_w = text.get_width()
+            text = font.render(str(base_hp), 1, pygame.Color(0, 100, 0))
             text_h = text.get_height()
             screen.blit(text, (self.base_size[0] + 5, self.base_size[1] + text_h))
 
@@ -115,7 +114,7 @@ class Game:
     def update_turrets(self, screen):
         for turret_id, turret in self.all_turrets.items():
             turret.shoot(self.all_enemies_on_map)
-            turret.update(screen)
+            turret.update(screen, self.all_enemies_on_map)
 
     def next_wave_sender(self):
         print('send')
@@ -129,19 +128,17 @@ class Game:
         out_state = 0
         state = None  # this param store value from self.menu.event_handler()
         # id for time-depends events
-        tick = 30
         new_wave = 31
-
-        tick_time = 10
+        second = 30
 
         clock = pygame.time.Clock()
-        pygame.time.set_timer(tick, tick_time)
+        pygame.time.set_timer(second, 1000)
         pygame.time.set_timer(new_wave, self.time_between_waves)
 
         self.menu = GameMenu()
         while out_state == 0 or out_state is None:  # main game-loop
             screen.fill(pygame.Color(255, 0, 0))
-
+            state = None
             for event in pygame.event.get():  # event handler cycle
                 # if event.type == VIDEORESIZE: # screen resize, but disable in this version
                 #     screen_width, screen_height = event.size
@@ -157,29 +154,34 @@ class Game:
                         return 8, screen
                     if event.key == K_SPACE:
                         self.next_wave_sender()
-                        pygame.time.set_timer(new_wave, self.time_between_waves)
+                        pygame.time.set_timer(second, 1000)
 
-                if event.type == tick:  # game tick event
-                    pygame.time.set_timer(tick, tick_time)
-                    self.time += 10
+                if event.type == second:  # next wave event
+                    pygame.time.set_timer(second, 1000)
+                    self.time -= 1
+                    if self.time == 0:
+                        self.next_wave_sender()
+                        self.time = 20
+                    print('second passed')
 
-                if event.type == new_wave:  # next wave event
-                    pygame.time.set_timer(new_wave, self.time_between_waves)
-                    self.next_wave_sender()
             # print(state)
             self.move_enemies()
             self.detected_enemy()
             if state == 1:
+                pygame.time.set_timer(second, 1000)
+                self.time = 20
                 self.next_wave_sender()
-                pygame.time.set_timer(new_wave, self.time_between_waves)
-            if state == 2:
-                self.all_turrets[self.turrets_id] = InfernoTower(100, 100)
 
+            if state == 2:
+                print('built')
+                self.all_turrets[self.turrets_id] = InfernoTower(100, 100)
+                self.turrets_id = (self.turrets_id + 1) % 100000
+            # print(self.all_turrets)
             self.game_map.update(screen, self.base_hp)
 
             self.update_enemies(screen)
             self.update_turrets(screen)
-            self.menu.update(screen)
+            self.menu.update(screen, self.time)
             print(self.time) if self.time % 100 == 0 else None
 
             clock.tick(self.fps)

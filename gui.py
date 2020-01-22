@@ -13,7 +13,7 @@ def objects_resize(list_of_objects, screen):
         obj.resize(screen)
 
 
-def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None) -> (int or None):
+def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None):
     for obj in obj_list:
         if fix_x is not None and fix_y is not None:
             a = obj.event_handler(event, fix_x, fix_y)
@@ -80,7 +80,6 @@ class Label:
         font = pygame.font.SysFont(self.font, self.font_size)
         for i, line in enumerate(lines):
             text = font.render(str(line), 1, self.text_color)
-            text_w = text.get_width()
             text_h = text.get_height()
             screen.blit(text,
                         (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
@@ -102,6 +101,7 @@ class PushButton:
     background_color: pygame.Color = pygame.Color(255, 255, 255)
     alpha: int = 200
     text: str = ''
+    flag: bool = False
     font: str = 'Comic Sans MS'
     font_size = None
     fix: int = 0.1
@@ -119,9 +119,13 @@ class PushButton:
                 self.triggered = True
             else:
                 self.triggered = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONUP and self.flag:
+            self.flag = False
+            print(1)
             if self.collide(event.pos, fix_x, fix_y):
                 return self.handler()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.flag = True
 
     def collide(self, mouse_pos, fix_x=0, fix_y=0):
         return mouse_pos[0] in range(self.rect[0] + fix_x, self.rect[2] + self.rect[0] + fix_x) and \
@@ -175,6 +179,7 @@ class PushButton:
 
 class GameMenu:
     buttons = list()
+    labels = list()
     height = 15
     rect = None
 
@@ -192,6 +197,9 @@ class GameMenu:
         build_inferno.text = 'build inferno\ntower'
         build_inferno.handler = lambda: 2
         build_inferno.alpha = 200
+        self.time_before_new_wave = Label(10, 50, 10, 50)
+        self.time_before_new_wave.text = '20'
+        self.time_before_new_wave.text_color = pygame.Color(255, 255, 255)
 
         self.buttons.append(next_wave)
         self.buttons.append(build_inferno)
@@ -213,13 +221,15 @@ class GameMenu:
         )
         return None
 
-    def update(self, screen):
+    def update(self, screen, time_to_next_wave):
+        self.time_before_new_wave.text = str(time_to_next_wave)
         if self.rect is None:
             self.resize(screen)
         menu = pygame.Surface(self.rect[2:])
         menu.fill(pygame.Color('black'))
         # menu.set_alpha(255)
         pass
+        self.time_before_new_wave.update(menu)
         updater(self.buttons, menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))
 

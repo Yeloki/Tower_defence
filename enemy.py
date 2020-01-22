@@ -19,7 +19,7 @@ class Enemy:
 
     def __init__(self, game_map: list, wave=0, difficult=1) -> None:
         self.game_map = game_map
-        self.hp = 50 + (wave - 1) * (difficult * 2)
+        self.hp = 100 + (wave - 1) * (difficult * 2)
         self.x, self.y = game_map[self.i].begin()
         self.speed = 1.8 + (difficult - 1) * 0.7
 

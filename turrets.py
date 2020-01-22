@@ -1,5 +1,7 @@
 from pygame import Color
-from pygame.draw import circle
+from pygame.draw import circle, aaline
+
+from other import distance
 
 
 class InfernoTower:
@@ -10,8 +12,11 @@ class InfernoTower:
         self.r_of_attack = 200
         self.target_id = -1
 
-    def update(self, screen) -> None:
+    def update(self, screen, enemies) -> None:
         circle(screen, Color(0, 0, 255), (int(self.x), int(self.y)), self.r)
+        if self.target_id == -1 or self.target_id not in enemies:
+            return
+        aaline(screen, Color(255, 50, 50), self.pos(), enemies[self.target_id].pos())
         # circle(screen, Color(0, 0, 255), (int(self.x), int(self.y)), self.r_of_attack)
 
     def range(self):
@@ -25,5 +30,8 @@ class InfernoTower:
 
     def shoot(self, enemies):
         if self.target_id == -1 or self.target_id not in enemies:
+            return
+        if distance(enemies[self.target_id].pos(), self.pos()) >= self.r_of_attack:
+            self.target_id = -1
             return
         enemies[self.target_id].get_damage(1)
