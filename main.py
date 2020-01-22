@@ -1,19 +1,20 @@
+from os import environ
+
 from pygame import Color
 from pygame.locals import *
 
-# from test import *
 from game import Game
 from gui import *
 
+# from test import *
+
+environ['SDL_VIDEO_CENTERED'] = '1'
 pygame.init()
+
 game_state = 0
 running = True
-# game_state == 0: main game menu
-# game_state == 1: main game settings
-# game_state == 2: map redactor
-# game_state == 3: new common game
-# game_state == 4: new game with uncommon settings
 
+# print(STATUSES)
 # BASIC PARAMS AND THEIR VALUES
 screen_width = 1024
 screen_height = 720
@@ -71,7 +72,7 @@ def menu() -> 'next game state':
     easy_game.handler = lambda: 1
     medium_game.handler = lambda: 2
     hard_game.handler = lambda: 3
-    map_creator.handler = lambda: 5
+    map_creator.handler = lambda: None
     challenges.handler = lambda: None
     settings.handler = lambda: None
     exit_btn.handler = lambda: 8
@@ -122,7 +123,7 @@ while running:
     if game_state in (1, 2, 3, 4):  # New game
         game = Game(game_state, 'levels/common.txt')
         game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
-        del game
+
     if game_state == 5:  # Map creator
         pass
     if game_state == 6:  # challenges

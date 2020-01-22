@@ -1,6 +1,13 @@
 from pygame import Color
 from pygame.draw import circle
-from other import Vector
+
+from other import distance
+
+STATUSES = dict()
+buffer = open('CONSTS', 'r')
+for key, val in map(lambda x: (x.split()[0], int(x.split()[1])), buffer.readlines()):
+    STATUSES[key] = val
+buffer.close()
 
 
 class Enemy:
@@ -8,26 +15,35 @@ class Enemy:
     i = 0
     abs_r_size = None
     game_map = None
+    current_status = 'ENEMY_STATUS_A_LIFE'
 
     def __init__(self, game_map: list, wave=0, difficult=1) -> None:
-        self.game_map = [Vector(*game_map[i], *game_map[i + 1]) for i in range(len(game_map))]
+        self.game_map = game_map
         self.hp = 10 + (wave - 1) * (difficult * 2)
-        self.x, self.y = game_map[self.i][0]
+        self.x, self.y = game_map[self.i].begin()
         self.speed = 1 + (difficult - 1) * 0.5
 
     def resize(self, screen):
-        self.abs_r_size = self.r_size * 10
+        self.abs_r_size = self.r_size * 20
 
-    def update(self, screen) -> None:
+    def update(self, screen) -> int:
         if self.abs_r_size is None:
             self.resize(screen)
-        circle(screen, Color(0, 0, 0), (int(self.x), int(self.y)), self.abs_r_size)
+        if self.hp <= 0:
+            return STATUSES['ENEMY_STATUS_DIED']
+        circle(screen, Color(0, 255, 0), (int(self.x), int(self.y)), self.abs_r_size)
+        return STATUSES[self.current_status]
 
     def move(self, screen=None) -> None:
-        height, width = screen.get_height(), screen.get_width()
-        import math
-        self.x += self.speed * self.game_map[self.i].len
+        # height, width = screen.get_height(), screen.get_width()
+        if distance((self.x, self.y), self.game_map[self.i].end()) <= self.speed:
+            if self.i + 1 == len(self.game_map):
+                self.current_status = 'ENEMY_STATUS_TO_GET_TO_BASE'
+            else:
+                self.i += 1
+        self.x += self.speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
+        self.y += self.speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
 
-    def take_damage(self, damage) -> bool:
+    def get_damage(self, damage) -> None:
         self.hp -= damage
-        return self.hp <= 0
+        return
