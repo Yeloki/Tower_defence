@@ -19,9 +19,9 @@ class Enemy:
 
     def __init__(self, game_map: list, wave=0, difficult=1) -> None:
         self.game_map = game_map
-        self.hp = 10 + (wave - 1) * (difficult * 2)
+        self.hp = 50 + (wave - 1) * (difficult * 2)
         self.x, self.y = game_map[self.i].begin()
-        self.speed = 1 + (difficult - 1) * 0.5
+        self.speed = 1.8 + (difficult - 1) * 0.7
 
     def resize(self, screen):
         self.abs_r_size = self.r_size * 20
@@ -34,7 +34,7 @@ class Enemy:
         circle(screen, Color(0, 255, 0), (int(self.x), int(self.y)), self.abs_r_size)
         return STATUSES[self.current_status]
 
-    def move(self, screen=None) -> None:
+    def move(self) -> None:
         # height, width = screen.get_height(), screen.get_width()
         if distance((self.x, self.y), self.game_map[self.i].end()) <= self.speed:
             if self.i + 1 == len(self.game_map):
@@ -43,6 +43,9 @@ class Enemy:
                 self.i += 1
         self.x += self.speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
         self.y += self.speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
+
+    def pos(self):
+        return self.x, self.y
 
     def get_damage(self, damage) -> None:
         self.hp -= damage

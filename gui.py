@@ -13,9 +13,16 @@ def objects_resize(list_of_objects, screen):
         obj.resize(screen)
 
 
-def emit_event_to_objects(obj_list, event) -> (int or None):
+def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None) -> (int or None):
     for obj in obj_list:
-        a = obj.event_handler(event)
+        if fix_x is not None and fix_y is not None:
+            a = obj.event_handler(event, fix_x, fix_y)
+        elif fix_x is not None:
+            a = obj.event_handler(event, fix_x)
+        elif fix_y is not None:
+            a = obj.event_handler(event, fix_y=fix_y)
+        else:
+            a = obj.event_handler(event)
         if a is not None:
             print(a)
             return a
@@ -106,19 +113,19 @@ class PushButton:
     def __init__(self, x: 'x in percent', y, size_x, size_y):
         self.x, self.y, self.size_x, self.size_y = x, y, size_x, size_y
 
-    def event_handler(self, event) -> handler:
+    def event_handler(self, event, fix_x=0, fix_y=0) -> handler:
         if event.type == pygame.MOUSEMOTION:
-            if self.collide(event.pos):
+            if self.collide(event.pos, fix_x, fix_y):
                 self.triggered = True
             else:
                 self.triggered = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.collide(event.pos):
+            if self.collide(event.pos, fix_x, fix_y):
                 return self.handler()
 
-    def collide(self, mouse_pos):
-        return mouse_pos[0] in range(self.rect[0], self.rect[2] + self.rect[0]) and \
-               mouse_pos[1] in range(self.rect[1], self.rect[3] + self.rect[1])
+    def collide(self, mouse_pos, fix_x=0, fix_y=0):
+        return mouse_pos[0] in range(self.rect[0] + fix_x, self.rect[2] + self.rect[0] + fix_x) and \
+               mouse_pos[1] in range(self.rect[1] + fix_y, self.rect[3] + self.rect[1] + fix_y)
 
     def __text_resize(self, button_size, fix):
         lines = self.text.split('\n')
@@ -161,27 +168,40 @@ class PushButton:
         font = pygame.font.SysFont(self.font, self.font_size)
         for i, line in enumerate(lines):
             text = font.render(str(line), 1, self.text_color)
-            text_w = text.get_width()
             text_h = text.get_height()
             screen.blit(text,
                         (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
 
 
 class GameMenu:
-    from time import time
     buttons = list()
     height = 15
     rect = None
 
     def __init__(self):
-        # next_wave = PushButton(0, 0, )
-        # self.buttons.append()
+        next_wave = PushButton(0, 0, 10, 50)
+        next_wave.background_color = pygame.Color('red')
+        next_wave.text_color = pygame.Color('black')
+        next_wave.text = 'next\nwave'
+        next_wave.handler = lambda: 1
+        next_wave.alpha = 200
+
+        build_inferno = PushButton(0, 50, 10, 50)
+        build_inferno.background_color = pygame.Color('red')
+        build_inferno.text_color = pygame.Color('black')
+        build_inferno.text = 'build inferno\ntower'
+        build_inferno.handler = lambda: 2
+        build_inferno.alpha = 200
+
+        self.buttons.append(next_wave)
+        self.buttons.append(build_inferno)
         pass
 
     def event_handler(self, event):
-
-        emit_event_to_objects(self.buttons, event)
-        return None
+        if self.rect is None:
+            return
+        a = emit_event_to_objects(self.buttons, event, *self.rect[:2])
+        return a
 
     def resize(self, screen) -> None:
         screen_height, screen_width = screen.get_height(), screen.get_width()
@@ -198,8 +218,9 @@ class GameMenu:
             self.resize(screen)
         menu = pygame.Surface(self.rect[2:])
         menu.fill(pygame.Color('black'))
-        menu.set_alpha(80)
+        # menu.set_alpha(255)
         pass
         updater(self.buttons, menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))
+
         return None
