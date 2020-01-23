@@ -13,7 +13,7 @@ buffer = open('CONSTS', 'r')
 for key, val in map(lambda x: (x.split()[0], int(x.split()[1])), buffer.readlines()):
     STATUSES[key] = val
 buffer.close()
-del buffer
+del buffer, key, val
 
 
 class GameMap:
@@ -129,7 +129,7 @@ class Game:
     def enemies_sender(self, ev_id):
         print('send')
         self.wave_queue[ev_id][1] -= 1
-        self.all_enemies_on_map[self.enemy_id] = Enemy(self.game_map.get_map(), difficult=self.difficult)
+        self.all_enemies_on_map[self.enemy_id] = Enemy(self.game_map.get_map(), wave=ev_id, difficult=self.difficult)
         self.enemy_id = (self.enemy_id + 1) % 100000
         if self.wave_queue[ev_id][1] == 0:
             del self.wave_queue[ev_id]
@@ -139,7 +139,7 @@ class Game:
     def start(self, screen) -> (int, pygame.Surface):
         screen_width = screen.get_width()
         screen_height = screen.get_height()
-        
+
         # states and other params
         out_state = 0
         state = None  # this param store value from self.menu.event_handler()

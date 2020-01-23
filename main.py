@@ -36,7 +36,7 @@ def menu() -> int:
     objects = list()
 
     x = 70
-    name = Label(x, 2, 20, 10)
+    name = PercentLabel(x, 2, 20, 10)
     easy_game = PushButton(x, 14, 20, 10)
     medium_game = PushButton(x, 26, 20, 10)
     hard_game = PushButton(x, 38, 20, 10)

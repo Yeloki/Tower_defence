@@ -1,6 +1,7 @@
 from pygame import Color
 from pygame.draw import circle
 
+from gui import PixelLabel
 from other import distance
 
 STATUSES = dict()
@@ -13,13 +14,17 @@ buffer.close()
 class Enemy:
     r_size = 1
     i = 0
+    wave = 1
+    max_hp = 0
     abs_r_size = None
     game_map = None
     current_status = 'ENEMY_STATUS_A_LIFE'
 
-    def __init__(self, game_map: list, wave=0, difficult=1) -> None:
+    def __init__(self, game_map: list, wave=1, difficult=1) -> None:
         self.game_map = game_map
-        self.hp = 100 + (wave - 1) * (difficult * 2)
+        self.wave = wave
+        self.hp = 100 + (wave - 1) * (difficult * 7)
+        self.max_hp = self.hp
         self.x, self.y = game_map[self.i].begin()
         self.speed = 1.8 + (difficult - 1) * 0.7
 
@@ -31,7 +36,15 @@ class Enemy:
             self.resize(screen)
         if self.hp <= 0:
             return STATUSES['ENEMY_STATUS_DIED']
+
+        text = str(int((self.hp / self.max_hp) * 100))
+
+        lb = PixelLabel(int(self.x), int(self.y))
+        lb.fix = 2
+        lb.font_size = 18
+        lb.text = text
         circle(screen, Color(0, 255, 0), (int(self.x), int(self.y)), self.abs_r_size)
+        lb.update(screen)
         return STATUSES[self.current_status]
 
     def move(self) -> None:

@@ -30,7 +30,7 @@ def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None):
 
 
 # All sizes stated in percent
-class Label:
+class PercentLabel:
     x: int = 0
     y: int = 0
     size_x: int = 0
@@ -42,7 +42,7 @@ class Label:
     font_size = None
     fix: int = 0.1
 
-    def __init__(self, x: 'x in percent', y, size_x, size_y):
+    def __init__(self, x, y, size_x, size_y):
         self.x, self.y, self.size_x, self.size_y = x, y, size_x, size_y
 
     def __text_resize(self, button_size, fix):
@@ -113,7 +113,7 @@ class PushButton:
     def __init__(self, x: 'x in percent', y, size_x, size_y):
         self.x, self.y, self.size_x, self.size_y = x, y, size_x, size_y
 
-    def event_handler(self, event, fix_x=0, fix_y=0) -> handler:
+    def event_handler(self, event, fix_x=0, fix_y=0):
         if event.type == pygame.MOUSEMOTION:
             if self.collide(event.pos, fix_x, fix_y):
                 self.triggered = True
@@ -177,6 +177,34 @@ class PushButton:
                         (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
 
 
+class PixelLabel:
+    x: int = 0
+    y: int = 0
+    rect = None
+    text_color: pygame.Color = pygame.Color(0, 0, 0)
+    text: str = ''
+    font: str = 'Comic Sans MS'
+    font_size = None
+    fix: int = 10
+
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+    def update(self, screen):
+        lines = self.text.split('\n')
+        font = pygame.font.SysFont(self.font, self.font_size)
+        for i, line in enumerate(lines):
+            text = font.render(str(line), 1, self.text_color)
+            text_w = text.get_width()
+            text_h = text.get_height()
+            screen.blit(text, (self.x - text_w // 2, self.y - (text_h // 2) + (text_h - self.fix) * i))
+
+    # stubs
+    @staticmethod
+    def event_handler(event) -> None:
+        return None
+
+
 class GameMenu:
     buttons = list()
     labels = list()
@@ -197,9 +225,9 @@ class GameMenu:
         build_inferno.text = 'build inferno\ntower'
         build_inferno.handler = lambda: 2
         build_inferno.alpha = 200
-        self.time_before_new_wave = Label(10, 50, 10, 50)
+        self.time_before_new_wave = PercentLabel(85, 0, 15, 50)
         self.time_before_new_wave.text = '20'
-        self.time_before_new_wave.text_color = pygame.Color(255, 255, 255)
+        self.time_before_new_wave.text_color = pygame.Color(0, 0, 0)
 
         self.buttons.append(next_wave)
         self.buttons.append(build_inferno)
@@ -222,12 +250,11 @@ class GameMenu:
         return None
 
     def update(self, screen, time_to_next_wave):
-        self.time_before_new_wave.text = str(time_to_next_wave)
+        self.time_before_new_wave.text = 'Time before\nnext wave:' + str(time_to_next_wave)
         if self.rect is None:
             self.resize(screen)
-        menu = pygame.Surface(self.rect[2:])
-        menu.fill(pygame.Color('black'))
-        # menu.set_alpha(255)
+        menu = pygame.Surface(self.rect[2:], pygame.SRCALPHA)
+        menu.fill(pygame.Color(100,50,100,100))
         pass
         self.time_before_new_wave.update(menu)
         updater(self.buttons, menu)
