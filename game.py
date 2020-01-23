@@ -57,7 +57,7 @@ class Game:
     COSTS = {'InfernoTower': 20}
     mouse_button_pressed = False
     # id
-    focus_on = -1
+    focus_on = None
     time = 20
     # next id of in-game objects
     enemy_id = 0
@@ -172,6 +172,7 @@ class Game:
         self.all_turrets[self.turrets_id] = TOWERS[tower_type](*pos)
         self.money -= self.COSTS[tower_type]
         self.turrets_id = (self.turrets_id + 1) % 100000
+
         pass
 
     def start(self, screen) -> (int, pygame.Surface):
@@ -225,6 +226,23 @@ class Game:
 
                 if event.type == MOUSEBUTTONDOWN:
                     self.mouse_button_pressed = True
+                    if self.focus_on is not None:
+                        self.all_turrets[self.focus_on].disable_trigger()
+                    flag = True
+                    for turret_id, turret in self.all_turrets.items():
+                        if distance(event.pos, (turret.x, turret.y)) <= turret.r:
+                            self.focus_on = turret_id
+                            flag = False
+                            break
+                    if flag:
+                        collision_x = event.pos[0] in range(self.menu.rect[0],
+                                                            self.menu.rect[2] + self.menu.rect[0] + 1)
+                        collision_y = event.pos[1] in range(self.menu.rect[1],
+                                                            self.menu.rect[3] + self.menu.rect[1] + 1)
+                        if not (collision_x and collision_y):
+                            self.focus_on = None
+                    if self.focus_on is not None:
+                        self.all_turrets[self.focus_on].enable_trigger()
 
                 if event.type == MOUSEBUTTONUP and self.mouse_button_pressed:
                     self.mouse_button_pressed = False

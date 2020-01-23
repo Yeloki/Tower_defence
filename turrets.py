@@ -12,7 +12,7 @@ class InfernoTower:
     def __init__(self, x, y) -> None:
         self.x = x
         self.y = y
-        self.triggered = True
+        self.triggered = False
         self.target_id = -1
 
     def update(self, screen, enemies) -> None:
@@ -39,10 +39,10 @@ class InfernoTower:
         pass
 
     def enable_trigger(self):
-        pass
+        self.triggered = True
 
     def disable_trigger(self):
-        pass
+        self.triggered = False
 
     def load_costs_of_upgrades(self):
         pass
