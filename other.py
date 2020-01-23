@@ -18,3 +18,15 @@ class Vector:
 
 def distance(point1, point2):
     return abs(((point2[1] - point1[1]) ** 2 + (point2[0] - point1[0]) ** 2) ** 0.5)
+
+
+def distance_to_vector(point1, vec: Vector):
+    x, y = point1
+    x1, y1 = vec.begin()
+    x2, y2 = vec.end()
+    l = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
+    pr = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)
+    cf = pr / l
+    xres = x1 + cf * (x2 - x1)
+    yres = y1 + cf * (y2 - y1)
+    return distance(point1, (xres, yres))

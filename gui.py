@@ -229,8 +229,15 @@ class GameMenu:
         self.time_before_new_wave.text = '20'
         self.time_before_new_wave.text_color = pygame.Color(0, 0, 0)
 
+        self.money_label = PercentLabel(85, 50, 15, 50)
+        self.money_label.text = '30$'
+        self.money_label.text_color = pygame.Color(0, 0, 0)
+
         self.buttons.append(next_wave)
         self.buttons.append(build_inferno)
+        pass
+
+    def load_upgrades(self):
         pass
 
     def event_handler(self, event):
@@ -249,13 +256,15 @@ class GameMenu:
         )
         return None
 
-    def update(self, screen, time_to_next_wave):
+    def update(self, screen, time_to_next_wave, money):
         self.time_before_new_wave.text = 'Time before\nnext wave:' + str(time_to_next_wave)
+        self.money_label.text = str(money) + '$'
         if self.rect is None:
             self.resize(screen)
         menu = pygame.Surface(self.rect[2:], pygame.SRCALPHA)
-        menu.fill(pygame.Color(100,50,100,100))
+        menu.fill(pygame.Color(100, 50, 100, 100))
         pass
+        self.money_label.update(menu)
         self.time_before_new_wave.update(menu)
         updater(self.buttons, menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))

@@ -6,12 +6,13 @@ from other import distance
 
 
 class InfernoTower:
+    r = 20
+    r_of_attack = 200
+
     def __init__(self, x, y) -> None:
         self.x = x
         self.y = y
-        self.r = 20
         self.triggered = True
-        self.r_of_attack = 200
         self.target_id = -1
 
     def update(self, screen, enemies) -> None:
@@ -43,10 +44,29 @@ class InfernoTower:
     def disable_trigger(self):
         pass
 
+    def load_costs_of_upgrades(self):
+        pass
+
+    def upgrade_damage(self):
+        pass
+
+    def upgrade_range(self):
+        pass
+
     def shoot(self, enemies):
         if self.target_id == -1 or self.target_id not in enemies:
             return
         if distance(enemies[self.target_id].pos(), self.pos()) >= self.r_of_attack:
             self.target_id = -1
             return
-        enemies[self.target_id].get_damage(1)
+        enemies[self.target_id].get_damage(2)
+
+
+def prototype(screen, pos: (int, int), r, range, collision: bool):
+    surface = Surface((range * 2, range * 2), SRCALPHA)
+    circle(surface, Color(0, 0, 0, 50), (range, range), range)
+    circle(surface, Color(0, 255, 0) if not collision else Color(255, 0, 0), (range, range), r)
+    screen.blit(surface, (pos[0] - range, pos[1] - range))
+
+
+TOWERS = {'InfernoTower': InfernoTower}

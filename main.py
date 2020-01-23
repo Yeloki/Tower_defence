@@ -109,15 +109,6 @@ def menu() -> int:
     return out_state
 
 
-def game(level_of_difficult):
-    """
-    This function draw all game interface and objects
-    :param level_of_difficult: level of difficult of new game
-    :return: next game state
-    """
-    pass
-
-
 while running:
     if game_state == 0:
         game_state = menu()
