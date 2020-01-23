@@ -1,3 +1,5 @@
+from time import time as global_time
+
 from pygame.constants import *
 
 from enemy import Enemy
@@ -59,6 +61,8 @@ class Game:
     fps = 60
 
     # objects case
+    wave_size = 10
+    wave_queue = dict()
     all_turrets = dict()
     all_enemies_on_map = dict()
 
@@ -117,23 +121,34 @@ class Game:
             turret.update(screen, self.all_enemies_on_map)
 
     def next_wave_sender(self):
+        self.current_wave += 1
+        self.wave_queue[self.current_wave] = [0, self.wave_size]
+        self.enemies_sender(self.current_wave)
+        # pygame.time.set_timer(self.current_wave, ())
+
+    def enemies_sender(self, ev_id):
         print('send')
+        self.wave_queue[ev_id][1] -= 1
         self.all_enemies_on_map[self.enemy_id] = Enemy(self.game_map.get_map(), difficult=self.difficult)
         self.enemy_id = (self.enemy_id + 1) % 100000
+        if self.wave_queue[ev_id][1] == 0:
+            del self.wave_queue[ev_id]
+            return
+        self.wave_queue[ev_id][0] = global_time()
 
     def start(self, screen) -> (int, pygame.Surface):
         screen_width = screen.get_width()
         screen_height = screen.get_height()
+        
         # states and other params
         out_state = 0
         state = None  # this param store value from self.menu.event_handler()
+
         # id for time-depends events
-        new_wave = 31
         second = 30
 
         clock = pygame.time.Clock()
         pygame.time.set_timer(second, 1000)
-        pygame.time.set_timer(new_wave, self.time_between_waves)
 
         self.menu = GameMenu()
         while out_state == 0 or out_state is None:  # main game-loop
@@ -154,6 +169,7 @@ class Game:
                         return 8, screen
                     if event.key == K_SPACE:
                         self.next_wave_sender()
+                        self.time = 20
                         pygame.time.set_timer(second, 1000)
 
                 if event.type == second:  # next wave event
@@ -164,7 +180,11 @@ class Game:
                         self.time = 20
                     print('second passed')
 
-            # print(state)
+            wave_timers = tuple(self.wave_queue.items())
+            for key, val in wave_timers:
+                if global_time() - val[0] >= 1:
+                    self.enemies_sender(key)
+
             self.move_enemies()
             self.detected_enemy()
             if state == 1:
