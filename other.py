@@ -27,6 +27,10 @@ def distance_to_vector(point1, vec: Vector):
     l = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
     pr = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)
     cf = pr / l
-    xres = x1 + cf * (x2 - x1)
-    yres = y1 + cf * (y2 - y1)
-    return distance(point1, (xres, yres))
+    if cf < 0:
+        cf = 0
+    if cf > 1:
+        cf = 1
+    x_res = x1 + cf * (x2 - x1)
+    y_res = y1 + cf * (y2 - y1)
+    return distance(point1, (x_res, y_res))
