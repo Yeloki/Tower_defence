@@ -37,11 +37,10 @@ class Enemy:
         if self.hp <= 0:
             return STATUSES['ENEMY_STATUS_DIED']
 
-        text = str(int((self.hp / self.max_hp) * 100))
+        text = int((self.hp / self.max_hp) * 100)
 
         lb = PixelLabel(int(self.x), int(self.y))
         lb.fix = 2
-        lb.font_size = 18
         lb.text = text
         circle(screen, Color(0, 255, 0), (int(self.x), int(self.y)), self.abs_r_size)
         lb.update(screen)

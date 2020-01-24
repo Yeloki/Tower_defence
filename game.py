@@ -111,6 +111,7 @@ class Game:
         for enemy_id, enemy in self.all_enemies_on_map.items():
             status = enemy.update(screen)
             if status == STATUSES['ENEMY_STATUS_DIED']:
+                self.money += self.all_enemies_on_map[enemy_id].wave
                 delete.append(enemy_id)
                 continue
             if status == STATUSES['ENEMY_STATUS_TO_GET_TO_BASE']:
@@ -118,7 +119,6 @@ class Game:
                 self.base_hp -= 1
                 continue
         for enemy_id in delete:
-            self.money += self.all_enemies_on_map[enemy_id].wave
             del self.all_enemies_on_map[enemy_id]
 
     def update_turrets(self, screen):
@@ -169,11 +169,17 @@ class Game:
         return False
 
     def build_tower(self, tower_type, pos):
+
         self.all_turrets[self.turrets_id] = TOWERS[tower_type](*pos)
         self.money -= self.COSTS[tower_type]
         self.turrets_id = (self.turrets_id + 1) % 100000
 
         pass
+
+    def turret_updater(self, type_of_update):
+        if self.money >= self.all_turrets[self.focus_on].characteristics()[type_of_update]:
+            self.money -= self.all_turrets[self.focus_on].characteristics()[type_of_update]
+            self.all_turrets[self.focus_on].upgrade(type_of_update)
 
     def start(self, screen) -> (int, pygame.Surface):
         screen_width = screen.get_width()
@@ -188,13 +194,13 @@ class Game:
 
         clock = pygame.time.Clock()
         pygame.time.set_timer(second, 1000)
-        want_to_build_flag = False
-        want_to_build_type = None
         self.menu = GameMenu()
+        want_to_build_type = None
+        want_to_build_flag = False
         while out_state == 0 or out_state is None:  # main game-loop
             screen.fill(pygame.Color(255, 0, 0))
             state = None
-            for event in pygame.event.get():  # event handler cycle
+            for event in pygame.event.get():  # event handler cycle begin
                 # menu handle
                 state = self.menu.event_handler(event)
 
@@ -230,15 +236,17 @@ class Game:
                         self.all_turrets[self.focus_on].disable_trigger()
                     flag = True
                     for turret_id, turret in self.all_turrets.items():
-                        if distance(event.pos, (turret.x, turret.y)) <= turret.r:
+                        if distance(event.pos, (turret.x, turret.y)) <= turret.radius_size:
                             self.focus_on = turret_id
                             flag = False
                             break
                     if flag:
+
                         collision_x = event.pos[0] in range(self.menu.rect[0],
                                                             self.menu.rect[2] + self.menu.rect[0] + 1)
                         collision_y = event.pos[1] in range(self.menu.rect[1],
                                                             self.menu.rect[3] + self.menu.rect[1] + 1)
+
                         if not (collision_x and collision_y):
                             self.focus_on = None
                     if self.focus_on is not None:
@@ -252,6 +260,7 @@ class Game:
                             self.build_tower(want_to_build_type, event.pos)
                         want_to_build_flag = False
                         want_to_build_type = None
+            # event handler cycle end
 
             wave_timers = tuple(self.wave_queue.items())
             for key, val in wave_timers:
@@ -266,24 +275,26 @@ class Game:
                 pygame.time.set_timer(second, 1000)
                 self.time = 20
                 self.next_wave_sender()
-
             if state == 2:
                 print('built')
                 want_to_build_flag = True
                 want_to_build_type = 'InfernoTower'
+            if state in (3, 4, 5, 6, 7):  # reserved for upgrades
+                self.turret_updater(state - 3)
 
             # screen update (DON'T CHANGE THE DRAWING ORDER)
             self.game_map.update(screen, self.base_hp)
             self.update_enemies(screen)
             self.update_turrets(screen)
-            self.menu.update(screen, self.time, self.money)
+            self.menu.update(screen, self.time, self.money, self.focus_on, self.all_turrets)
 
             if want_to_build_flag:
                 prototype(screen,
                           self.current_pos,
-                          TOWERS[want_to_build_type].r,
-                          TOWERS[want_to_build_type].r_of_attack,
-                          self.collision(self.current_pos, TOWERS[want_to_build_type].r, want_to_build_type, screen))
+                          TOWERS[want_to_build_type].radius_size,
+                          TOWERS[want_to_build_type].range_of_attack,
+                          self.collision(self.current_pos, TOWERS[want_to_build_type].radius_size, want_to_build_type,
+                                         screen))
 
             # fps wait and flip the display
             clock.tick(self.fps)

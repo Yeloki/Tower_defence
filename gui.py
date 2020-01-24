@@ -1,6 +1,12 @@
-from typing import Callable
-
 import pygame
+
+pygame.init()
+NUMS = dict()
+size = 18
+font = pygame.font.SysFont('Comic Sans MS', size)
+for i in range(101):
+    NUMS[i] = font.render(str(i), 1, pygame.Color(0, 0, 0))
+del font, i, size
 
 
 def updater(obj_list, screen):
@@ -105,8 +111,7 @@ class PushButton:
     font: str = 'Comic Sans MS'
     font_size = None
     fix: int = 0.1
-    handler: Callable = lambda: None
-    in_handler: Callable = lambda x: None
+    handler: None
     # flags of this class:
     triggered: bool = False
 
@@ -123,7 +128,7 @@ class PushButton:
             self.flag = False
             print(1)
             if self.collide(event.pos, fix_x, fix_y):
-                return self.handler()
+                return self.handler
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.flag = True
 
@@ -136,7 +141,7 @@ class PushButton:
         max_height = 0
         max_width = 0
         best = 1
-        for size in range(1, 1000):
+        for size in range(1, 100):
             font = pygame.font.SysFont('Comic Sans MS', size)
             for i, elem in enumerate(lines):
                 text = font.render(str(elem), 1, self.text_color)
@@ -181,9 +186,7 @@ class PixelLabel:
     x: int = 0
     y: int = 0
     rect = None
-    text_color: pygame.Color = pygame.Color(0, 0, 0)
-    text: str = ''
-    font: str = 'Comic Sans MS'
+    text = 0
     font_size = None
     fix: int = 10
 
@@ -191,13 +194,10 @@ class PixelLabel:
         self.x, self.y = x, y
 
     def update(self, screen):
-        lines = self.text.split('\n')
-        font = pygame.font.SysFont(self.font, self.font_size)
-        for i, line in enumerate(lines):
-            text = font.render(str(line), 1, self.text_color)
-            text_w = text.get_width()
-            text_h = text.get_height()
-            screen.blit(text, (self.x - text_w // 2, self.y - (text_h // 2) + (text_h - self.fix) * i))
+        text = NUMS[self.text]
+        text_w = text.get_width()
+        text_h = text.get_height()
+        screen.blit(text, (self.x - text_w // 2, self.y - (text_h // 2)))
 
     # stubs
     @staticmethod
@@ -210,21 +210,26 @@ class GameMenu:
     labels = list()
     height = 15
     rect = None
+    turret_id = None
+    characteristics_labels = []
+    count_of_characteristics = 0
+    characteristics_upgrades_buttons = []
 
     def __init__(self):
         next_wave = PushButton(0, 0, 10, 50)
         next_wave.background_color = pygame.Color('red')
         next_wave.text_color = pygame.Color('black')
         next_wave.text = 'next\nwave'
-        next_wave.handler = lambda: 1
+        next_wave.handler = 1
         next_wave.alpha = 200
 
         build_inferno = PushButton(0, 50, 10, 50)
         build_inferno.background_color = pygame.Color('red')
         build_inferno.text_color = pygame.Color('black')
         build_inferno.text = 'build inferno\ntower'
-        build_inferno.handler = lambda: 2
+        build_inferno.handler = 2
         build_inferno.alpha = 200
+
         self.time_before_new_wave = PercentLabel(85, 0, 15, 50)
         self.time_before_new_wave.text = '20'
         self.time_before_new_wave.text_color = pygame.Color(0, 0, 0)
@@ -233,17 +238,32 @@ class GameMenu:
         self.money_label.text = '30$'
         self.money_label.text_color = pygame.Color(0, 0, 0)
 
+        for i in range(5):
+            self.characteristics_labels.append(PercentLabel(10 * (i + 1), 0, 10, 50))
+        for i in range(5):
+            self.characteristics_upgrades_buttons.append(PushButton(10 * (i + 1), 50, 10, 50))
+            self.characteristics_upgrades_buttons[i].alpha = 200
+            self.characteristics_upgrades_buttons[i].background_color = pygame.Color('red')
+            self.characteristics_upgrades_buttons[i].handler = i + 3
         self.buttons.append(next_wave)
         self.buttons.append(build_inferno)
         pass
 
-    def load_upgrades(self):
+    def load_upgrades(self, upgrades):
+        pass
+
+    def load_characteristics(self, characteristics):
         pass
 
     def event_handler(self, event):
         if self.rect is None:
             return
-        a = emit_event_to_objects(self.buttons, event, *self.rect[:2])
+        if self.turret_id is not None:
+            a = emit_event_to_objects(
+                (*self.buttons, *self.characteristics_upgrades_buttons[:self.count_of_characteristics]), event,
+                *self.rect[:2])
+        else:
+            a = emit_event_to_objects(self.buttons, event, *self.rect[:2])
         return a
 
     def resize(self, screen) -> None:
@@ -256,16 +276,33 @@ class GameMenu:
         )
         return None
 
-    def update(self, screen, time_to_next_wave, money):
+    def update(self, screen, time_to_next_wave, money, turret_id, turrets_list):
+        self.turret_id = turret_id
         self.time_before_new_wave.text = 'Time before\nnext wave:' + str(time_to_next_wave)
         self.money_label.text = str(money) + '$'
+
         if self.rect is None:
             self.resize(screen)
+
         menu = pygame.Surface(self.rect[2:], pygame.SRCALPHA)
         menu.fill(pygame.Color(100, 50, 100, 100))
-        pass
+
         self.money_label.update(menu)
+        if self.turret_id is not None:
+
+            for label, text in zip(self.characteristics_labels,
+                                   turrets_list[self.turret_id].get_characteristics()):
+                label.text = text
+                label.update(menu)
+
+            for button, text in zip(self.characteristics_upgrades_buttons,
+                                    turrets_list[self.turret_id].get_costs_of_upgrades()):
+                button.text = text
+                button.update(menu)
+            self.count_of_characteristics = len(turrets_list[self.turret_id].get_costs_of_upgrades())
+
         self.time_before_new_wave.update(menu)
+
         updater(self.buttons, menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))
 

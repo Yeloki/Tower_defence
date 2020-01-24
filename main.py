@@ -70,13 +70,13 @@ def menu() -> int:
     exit_btn.text = 'Exit'
     name.text = 'Onslaught'
 
-    easy_game.handler = lambda: 1
-    medium_game.handler = lambda: 2
-    hard_game.handler = lambda: 3
-    map_creator.handler = lambda: None
-    challenges.handler = lambda: None
-    settings.handler = lambda: None
-    exit_btn.handler = lambda: 8
+    easy_game.handler = 1
+    medium_game.handler = 2
+    hard_game.handler = 3
+    map_creator.handler = None
+    challenges.handler = None
+    settings.handler = None
+    exit_btn.handler = 8
 
     objects.append(easy_game)
     objects.append(medium_game)
