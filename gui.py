@@ -330,15 +330,12 @@ class GameMenu:
                                     turrets_list[self.turret_id].get_costs_of_upgrades()):
                 if text[2] == 10:
                     button.text = 'MAX'
-                    # button.resize(menu)
                     button.background_color = pygame.Color(255, 0, 0)
                 elif money < text[1]:
                     button.text = text[0]
-                    # button.resize(menu)
                     button.background_color = pygame.Color(255, 0, 0)
                 else:
                     button.text = text[0]
-                    # button.resize(menu)
                     button.background_color = pygame.Color(0, 255, 0)
                 button.update(menu)
             self.count_of_characteristics = len(turrets_list[self.turret_id].get_costs_of_upgrades())

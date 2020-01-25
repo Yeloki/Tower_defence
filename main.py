@@ -52,7 +52,7 @@ def menu() -> int:
     challenges.background_color, challenges.text_color = Color(255, 255, 255), Color(0, 0, 0)
     settings.background_color, settings.text_color = Color(255, 255, 255), Color(0, 0, 0)
     exit_btn.background_color, exit_btn.text_color = Color(255, 255, 255), Color(0, 0, 0)
-    name.text_color = Color(255,255,255)
+    name.text_color = Color(255, 255, 255)
     easy_game.alpha = 200
     medium_game.alpha = 200
     hard_game.alpha = 200
