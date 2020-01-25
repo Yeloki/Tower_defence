@@ -247,28 +247,29 @@ class GameMenu:
     def __init__(self):
         next_wave = PushButton(0, 0, 10, 50)
         next_wave.background_color = pygame.Color('red')
-        next_wave.text_color = pygame.Color('black')
+        next_wave.text_color = pygame.Color(255, 255, 255)
         next_wave.text = 'next\nwave'
         next_wave.handler = 1
         next_wave.alpha = 200
 
         build_inferno = PushButton(0, 50, 10, 50)
         build_inferno.background_color = pygame.Color('red')
-        build_inferno.text_color = pygame.Color('black')
+        build_inferno.text_color = pygame.Color(255, 255, 255)
         build_inferno.text = 'build inferno\ntower'
         build_inferno.handler = 2
         build_inferno.alpha = 200
 
         self.time_before_new_wave = PercentLabel(85, 0, 15, 50)
         self.time_before_new_wave.text = '20'
-        self.time_before_new_wave.text_color = pygame.Color(0, 0, 0)
+        self.time_before_new_wave.text_color = pygame.Color(255, 255, 255)
 
         self.money_label = PercentLabel(85, 50, 15, 50)
         self.money_label.text = '30$'
-        self.money_label.text_color = pygame.Color(0, 0, 0)
+        self.money_label.text_color = pygame.Color(255, 255, 255)
 
         for i in range(5):
             self.characteristics_labels.append(PercentLabel(10 * (i + 1), 0, 10, 50))
+            self.characteristics_labels[i].text_color = pygame.Color(255, 255, 255)
         for i in range(5):
             self.characteristics_upgrades_buttons.append(PushButton(10 * (i + 1), 50, 10, 50))
             self.characteristics_upgrades_buttons[i].alpha = 200
@@ -317,16 +318,25 @@ class GameMenu:
         menu.fill(pygame.Color(100, 50, 100, 100))
 
         self.money_label.update(menu)
-        if self.turret_id is not None:
-
+        if self.turret_id is not None:  # if user check turret characteristics
             for label, text in zip(self.characteristics_labels,
                                    turrets_list[self.turret_id].get_characteristics()):
-                label.text = text
+                if text[1] == 10:
+                    label.text = text[0] + ' (MAX)'
+                else:
+                    label.text = text[0]
                 label.update(menu)
-
             for button, text in zip(self.characteristics_upgrades_buttons,
                                     turrets_list[self.turret_id].get_costs_of_upgrades()):
-                button.text = text
+                if text[2] == 10:
+                    button.text = 'MAX'
+                    button.background_color = pygame.Color(255, 0, 0)
+                elif money < text[1]:
+                    button.text = text[0]
+                    button.background_color = pygame.Color(255, 0, 0)
+                else:
+                    button.text = text[0]
+                    button.background_color = pygame.Color(0, 255, 0)
                 button.update(menu)
             self.count_of_characteristics = len(turrets_list[self.turret_id].get_costs_of_upgrades())
 

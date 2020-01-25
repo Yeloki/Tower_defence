@@ -2,6 +2,7 @@ from pygame import Color, Surface
 from pygame.draw import circle, aaline
 from pygame.locals import *
 
+from gui import draw_better_line
 from other import distance
 
 
@@ -32,12 +33,13 @@ class InfernoTower:
     def update(self, screen, enemies) -> None:
         surface = Surface((self.range_of_attack * 2, self.range_of_attack * 2), SRCALPHA)
         if self.triggered:
-            circle(surface, Color(0, 0, 0, 50), (self.range_of_attack, self.range_of_attack), self.range_of_attack)
+            circle(surface, Color(0, 255, 0, 50), (self.range_of_attack, self.range_of_attack), self.range_of_attack)
         circle(surface, Color(0, 0, 255, 255), (self.range_of_attack, self.range_of_attack), self.radius_size)
         screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
         if self.target_id == -1 or self.target_id not in enemies:
             return
-        aaline(screen, Color(255, 50, 50), self.pos(), enemies[self.target_id].pos())
+        draw_better_line(screen, self.pos(), enemies[self.target_id].pos(), Color(255, 50, 50), 2)
+        aaline(screen, Color(246, 242, 0), self.pos(), enemies[self.target_id].pos())
         # circle(screen, Color(0, 0, 255), (int(self.x), int(self.y)), self.range_of_attack)
 
     def upgrade(self, type_of_characteristics):
@@ -75,22 +77,23 @@ class InfernoTower:
         # can damage enemies with damage per second ( damage // 60)
 
     def get_characteristics(self):
-        out = []
-        return 'damage:\n' + str(self.damage), \
-               'range:\n' + str(self.range_of_attack)
+        out = [self.i, self.j]
+        return tuple(zip(('damage:\n' + str(self.damage), 'range:\n' + str(self.range_of_attack)), out))
 
     def get_costs_of_upgrades(self):
-        out = []
-        return 'Upgrade damage.\nCost:' + str(self.damage_update_cost), \
-               'Upgrade range.\nCost: ' + str(self.range_update_cost)
+        out = [self.damage_update_cost, self.range_update_cost]
+        out2 = [self.i, self.j]
+        return tuple(zip(('Upgrade damage.\nCost:' + str(self.damage_update_cost), 'Upgrade range.\nCost: ' + str(
+            self.range_update_cost)), out, out2))
 
     def characteristics(self):
-        return self.damage_update_cost, self.range_update_cost
+        out = [self.i, self.j]
+        return tuple(zip((self.damage_update_cost, self.range_update_cost), out))
 
 
 def prototype(screen, pos: (int, int), r, turret_range, collision: bool):
     surface = Surface((turret_range * 2, turret_range * 2), SRCALPHA)
-    circle(surface, Color(0, 0, 0, 50), (turret_range, turret_range), turret_range)
+    circle(surface, Color(0, 255, 0, 50), (turret_range, turret_range), turret_range)
     circle(surface, Color(0, 255, 0) if not collision else Color(255, 0, 0), (turret_range, turret_range), r)
     screen.blit(surface, (pos[0] - turret_range, pos[1] - turret_range))
 

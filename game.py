@@ -180,9 +180,10 @@ class Game:
 
         pass
 
-    def turret_updater(self, type_of_update):
-        if self.money >= self.all_turrets[self.focus_on].characteristics()[type_of_update]:
-            self.money -= self.all_turrets[self.focus_on].characteristics()[type_of_update]
+    def turret_upgrade(self, type_of_update):
+        if self.money >= self.all_turrets[self.focus_on].characteristics()[type_of_update][0] and \
+                self.all_turrets[self.focus_on].characteristics()[type_of_update][1] != 10:
+            self.money -= self.all_turrets[self.focus_on].characteristics()[type_of_update][0]
             self.all_turrets[self.focus_on].upgrade(type_of_update)
 
     def start(self, screen) -> (int, pygame.Surface):
@@ -284,7 +285,7 @@ class Game:
                 want_to_build_flag = True
                 want_to_build_type = 'InfernoTower'
             if state in (3, 4, 5, 6, 7):  # reserved for upgrades
-                self.turret_updater(state - 3)
+                self.turret_upgrade(state - 3)
 
             # screen update (DON'T CHANGE THE DRAWING ORDER)
             self.game_map.update(screen, self.base_hp)
