@@ -31,11 +31,11 @@ def terminate():
 
 def menu() -> int:
     global screen, screen_width, screen_height
-    background = pygame.image.load('images/background.jpg')
+    background = pygame.image.load('images/menu_background.jpg')
     out_state = 0
     objects = list()
 
-    x = 70
+    x = 10
     name = PercentLabel(x, 2, 20, 10)
     easy_game = PushButton(x, 14, 20, 10)
     medium_game = PushButton(x, 26, 20, 10)

@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 pygame.init()
@@ -33,6 +35,33 @@ def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None):
             print(a)
             return a
     return None
+
+
+def draw_better_line(screen, point1: tuple, point2: tuple, color, width):
+    x1, y1, x2, y2 = *point1, *point2
+    dx = x2 - x1
+    dy = y2 - y1
+    len = math.sqrt(dx * dx + dy * dy)
+    udx = dx / len
+    udy = dy / len
+    perpx = -udy * width
+    perpy = udx * width
+    # "left" line start
+    x1_ = x1 + perpx
+    y1_ = y1 + perpy
+    # "left" line end
+    x2_ = x1_ + dx
+    y2_ = y1_ + dy
+    # "right" line start
+    x1__ = x1 - perpx
+    y1__ = y1 - perpy
+
+    # "right" line start
+    x2__ = x1__ + dx
+    y2__ = y1__ + dy
+    points = ((x1_, y1_), (x2_, y2_), (x2__, y2__), (x1__, y1__))
+    pygame.draw.polygon(screen, color, points)
+    pass
 
 
 # All sizes stated in percent

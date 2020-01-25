@@ -76,7 +76,7 @@ class InfernoTower:
 
     def get_characteristics(self):
         out = []
-        return 'damage:\n' + str(self.damage),\
+        return 'damage:\n' + str(self.damage), \
                'range:\n' + str(self.range_of_attack)
 
     def get_costs_of_upgrades(self):

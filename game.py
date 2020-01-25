@@ -24,13 +24,14 @@ class GameMap:
     game_map = list()
     base = None
     base_size = None
-    background = pygame.image.load('images/background_v4.jpg')
+    background = pygame.image.load('images/game_background.jpg')
 
     def __init__(self, path_to_map):
         file = open(path_to_map, 'r').readlines()
         self.x_size, self.y_size = map(int, file[0].split()[:-1])
         self.base_size = tuple(map(int, file[1].split()))
         file = tuple(map(lambda x: tuple(map(int, x.split())), file[2:]))
+        self.dots = [i for i in file]
         self.game_map = [Vector(*file[i], *file[i + 1]) for i in range(len(file) - 1)]
         print(file)
 
@@ -41,7 +42,10 @@ class GameMap:
         screen_width, screen_height = screen.get_width(), screen.get_height()
         screen.blit(pygame.transform.scale(self.background, (screen_width, screen_height)), (0, 0))
         for vec in self.game_map:
-            pygame.draw.line(screen, pygame.Color(255, 0, 0), vec.begin(), vec.end(), self.line_width * 2)
+            # pygame.draw.line(screen, pygame.Color(0,62,141), vec.begin(), vec.end(), self.line_width * 2)
+            draw_better_line(screen, vec.begin(), vec.end(), pygame.Color(0, 62, 141), self.line_width)
+        for dot in self.dots:
+            pygame.draw.circle(screen, pygame.Color(0, 62, 141), dot, self.line_width)
         if self.base is not None:
             screen.blit(pygame.transform.scale(self.base, self.base_size[:2]), (self.base_size[2:]))
         else:
@@ -62,11 +66,11 @@ class Game:
     # next id of in-game objects
     enemy_id = 0
     turrets_id = 0
+    wave_size = 10
     current_pos = (0, 0)
     fps = 60
 
     # objects case
-    wave_size = 10
     wave_queue = dict()
     all_turrets = dict()
     all_enemies_on_map = dict()
