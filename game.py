@@ -103,7 +103,7 @@ class Game:
         for enemy_id, enemy in self.all_enemies_on_map.items():
             for turret_id, turret in self.all_turrets.items():
                 if turret_id not in busy:
-                    busy[turret_id] = 1
+                    busy[turret_id] = 0
                 if distance(turret.pos(), enemy.pos()) < turret.range() and busy[turret_id] < turret.target_count:
                     turret.set_target(enemy_id)
                     if turret_id in busy:
