@@ -255,7 +255,7 @@ class GameMenu:
         build_inferno = PushButton(0, 50, 10, 50)
         build_inferno.background_color = pygame.Color('red')
         build_inferno.text_color = pygame.Color(255, 255, 255)
-        build_inferno.text = 'build inferno\ntower'
+        build_inferno.text = 'build\ninferno tower\ncost: 20$'
         build_inferno.handler = 2
         build_inferno.alpha = 200
 
@@ -330,12 +330,15 @@ class GameMenu:
                                     turrets_list[self.turret_id].get_costs_of_upgrades()):
                 if text[2] == 10:
                     button.text = 'MAX'
+                    # button.resize(menu)
                     button.background_color = pygame.Color(255, 0, 0)
                 elif money < text[1]:
                     button.text = text[0]
+                    # button.resize(menu)
                     button.background_color = pygame.Color(255, 0, 0)
                 else:
                     button.text = text[0]
+                    # button.resize(menu)
                     button.background_color = pygame.Color(0, 255, 0)
                 button.update(menu)
             self.count_of_characteristics = len(turrets_list[self.turret_id].get_costs_of_upgrades())

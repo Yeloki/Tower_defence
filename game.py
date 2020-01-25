@@ -99,12 +99,15 @@ class Game:
 
     def detected_enemy(self):
         a = distance
-        busy = list()
+        busy = dict()
         for enemy_id, enemy in self.all_enemies_on_map.items():
             for turret_id, turret in self.all_turrets.items():
-                if distance(turret.pos(), enemy.pos()) < turret.range() and turret_id not in busy:
+                if turret_id not in busy:
+                    busy[turret_id] = 1
+                if distance(turret.pos(), enemy.pos()) < turret.range() and busy[turret_id] < turret.target_count:
                     turret.set_target(enemy_id)
-                    busy.append(turret_id)
+                    if turret_id in busy:
+                        busy[turret_id] += 1
 
     def move_enemies(self):
         for enemy_id, enemy in self.all_enemies_on_map.items():
@@ -286,7 +289,6 @@ class Game:
                 want_to_build_type = 'InfernoTower'
             if state in (3, 4, 5, 6, 7):  # reserved for upgrades
                 self.turret_upgrade(state - 3)
-
             # screen update (DON'T CHANGE THE DRAWING ORDER)
             self.game_map.update(screen, self.base_hp)
             self.update_enemies(screen)
