@@ -7,7 +7,7 @@ NUMS = dict()
 size = 18
 font = pygame.font.SysFont('Comic Sans MS', size)
 for i in range(101):
-    NUMS[i] = font.render(str(i), 1, pygame.Color(0, 0, 0))
+    NUMS[i] = font.render(str(i), 1, pygame.Color(255, 255, 255))
 del font, i, size
 
 
@@ -245,19 +245,27 @@ class GameMenu:
     characteristics_upgrades_buttons = []
 
     def __init__(self):
-        next_wave = PushButton(0, 0, 10, 50)
+        next_wave = PushButton(7.5, 0, 10, 50)
         next_wave.background_color = pygame.Color('red')
         next_wave.text_color = pygame.Color(255, 255, 255)
         next_wave.text = 'next\nwave'
         next_wave.handler = 1
         next_wave.alpha = 200
 
-        build_inferno = PushButton(0, 50, 10, 50)
-        build_inferno.background_color = pygame.Color('red')
-        build_inferno.text_color = pygame.Color(255, 255, 255)
-        build_inferno.text = 'build\ninferno tower\ncost: 20$'
-        build_inferno.handler = 2
-        build_inferno.alpha = 200
+        build_tower = PushButton(7.5, 50, 10, 50)
+        build_tower.background_color = pygame.Color('red')
+        build_tower.text_color = pygame.Color(255, 255, 255)
+        build_tower.text = 'build\ninferno tower\ncost: 20$'
+        build_tower.handler = 2
+        build_tower.alpha = 200
+
+        prev_tower = PushButton(0, 50, 7.5, 50)
+        prev_tower.text = '<-'
+        prev_tower.handler = -1
+
+        next_tower = PushButton(17.5, 50, 7.5, 50)
+        next_tower.text = '->'
+        next_tower.handler = 1
 
         self.time_before_new_wave = PercentLabel(85, 0, 15, 50)
         self.time_before_new_wave.text = '20'
@@ -268,15 +276,17 @@ class GameMenu:
         self.money_label.text_color = pygame.Color(255, 255, 255)
 
         for i in range(5):
-            self.characteristics_labels.append(PercentLabel(10 * (i + 1), 0, 10, 50))
+            self.characteristics_labels.append(PercentLabel(5 + 10 * (i + 2), 0, 10, 50))
             self.characteristics_labels[i].text_color = pygame.Color(255, 255, 255)
         for i in range(5):
-            self.characteristics_upgrades_buttons.append(PushButton(10 * (i + 1), 50, 10, 50))
+            self.characteristics_upgrades_buttons.append(PushButton(5 + 10 * (i + 2), 50, 10, 50))
             self.characteristics_upgrades_buttons[i].alpha = 200
             self.characteristics_upgrades_buttons[i].background_color = pygame.Color('red')
             self.characteristics_upgrades_buttons[i].handler = i + 3
         self.buttons.append(next_wave)
-        self.buttons.append(build_inferno)
+        self.buttons.append(build_tower)
+        # self.buttons.append(next_tower)
+        # self.buttons.append(prev_tower)
         pass
 
     def load_upgrades(self, upgrades):
@@ -341,8 +351,5 @@ class GameMenu:
             self.count_of_characteristics = len(turrets_list[self.turret_id].get_costs_of_upgrades())
 
         self.time_before_new_wave.update(menu)
-
         updater(self.buttons, menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))
-
-        return None

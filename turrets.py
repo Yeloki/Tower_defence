@@ -1,14 +1,21 @@
 from pygame import Color, Surface
+from pygame import image, transform
 from pygame.draw import circle, aaline
 from pygame.locals import *
 
 from gui import draw_better_line
 from other import distance
 
+inferno1 = transform.scale(image.load('images/inferno1-5.png'), (40, 40))
+inferno2 = transform.scale(image.load('images/inferno6-12.png'), (40, 40))
+inferno3 = transform.scale(image.load('images/inferno13-19.png'), (40, 40))
+inferno4 = transform.scale(image.load('images/inferno_20.png'), (40, 40))
+
+
+# inferno = [inferno1, inferno2, inferno3, inferno4]
 
 class InfernoTower:
     radius_size = 20
-
     # damage
     damage = 120
 
@@ -33,14 +40,35 @@ class InfernoTower:
     def update(self, screen, enemies) -> None:
         surface = Surface((self.range_of_attack * 2, self.range_of_attack * 2), SRCALPHA)
         if self.triggered:
-            circle(surface, Color(0, 255, 0, 50), (self.range_of_attack, self.range_of_attack), self.range_of_attack)
-        circle(surface, Color(0, 0, 255, 255), (self.range_of_attack, self.range_of_attack), self.radius_size)
-        screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
+            circle(surface, Color(0, 255, 0, 25), (self.range_of_attack, self.range_of_attack), self.range_of_attack)
+        colors = ((Color(255, 255, 255), Color(255, 255, 255)),
+                  (Color(50, 50, 255), Color(0, 242, 255)),
+                  (Color(50, 255, 50), Color(100, 242, 0)),
+                  (Color(255, 50, 50), Color(246, 242, 0)))
+        if 1 <= self.i + self.j <= 5:
+            surface.blit(inferno1, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
+            screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
+            color_key = 0
+
+        elif 6 <= self.i + self.j <= 12:
+            surface.blit(inferno2, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
+            screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
+            color_key = 1
+
+        elif 13 <= self.i + self.j <= 19:
+            surface.blit(inferno3, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
+            screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
+            color_key = 2
+
+        else:
+            surface.blit(inferno4, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
+            screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
+            color_key = 3
+
         if self.target_id == -1 or self.target_id not in enemies:
             return
-        draw_better_line(screen, self.pos(), enemies[self.target_id].pos(), Color(255, 50, 50), 2)
-        aaline(screen, Color(246, 242, 0), self.pos(), enemies[self.target_id].pos())
-        # circle(screen, Color(0, 0, 255), (int(self.x), int(self.y)), self.range_of_attack)
+        draw_better_line(screen, self.pos(), enemies[self.target_id].pos(), colors[color_key][0], 2)
+        aaline(screen, colors[color_key][1], self.pos(), enemies[self.target_id].pos())
 
     def upgrade(self, type_of_characteristics):
         if type_of_characteristics == 0 and self.i != self.max_upgrade_damage_count:
@@ -73,8 +101,7 @@ class InfernoTower:
         if distance(enemies[self.target_id].pos(), self.pos()) >= self.range_of_attack:
             self.target_id = -1
             return
-        enemies[self.target_id].get_damage(self.damage // 60)  # it's mean that this tower
-        # can damage enemies with damage per second ( damage // 60)
+        enemies[self.target_id].get_damage(self.damage // 60)
 
     def get_characteristics(self):
         out = [self.i, self.j]
@@ -96,6 +123,11 @@ def prototype(screen, pos: (int, int), r, turret_range, collision: bool):
     circle(surface, Color(0, 255, 0, 50), (turret_range, turret_range), turret_range)
     circle(surface, Color(0, 255, 0) if not collision else Color(255, 0, 0), (turret_range, turret_range), r)
     screen.blit(surface, (pos[0] - turret_range, pos[1] - turret_range))
+
+
+class GunTower:
+    def __init__(self):
+        pass
 
 
 TOWERS = {'InfernoTower': InfernoTower}

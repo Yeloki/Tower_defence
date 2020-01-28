@@ -1,3 +1,6 @@
+from pygame import transform
+
+
 class Vector:
     def __init__(self, x1, y1, x2, y2):
         self.x_begin, self.y_begin = x1, y1
@@ -34,3 +37,13 @@ def distance_to_vector(point1, vec: Vector):
     x_res = x1 + cf * (x2 - x1)
     y_res = y1 + cf * (y2 - y1)
     return distance(point1, (x_res, y_res))
+
+
+def rot_center(image, angle):
+    """rotate an image while keeping its center and size"""
+    orig_rect = image.get_rect()
+    rot_image = transform.rotate(image, angle)
+    rot_rect = orig_rect.copy()
+    rot_rect.center = rot_image.get_rect().center
+    rot_image = rot_image.subsurface(rot_rect).copy()
+    return rot_image
