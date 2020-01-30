@@ -73,8 +73,11 @@ class Enemy:
                 self.i += 1
         self.x += self.speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
         self.y += self.speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
-        self.alpha = int(degrees(atan((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) /
-                                      (self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0]))))
+        try:
+            self.alpha = int(degrees(atan((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) /
+                                          (self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0]))))
+        except ZeroDivisionError:
+            self.alpha = -90
 
     def pos(self):
         return self.x, self.y

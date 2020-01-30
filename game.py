@@ -56,36 +56,36 @@ class GameMap:
 
 
 class Game:
-    money = 30
-    COSTS = {'InfernoTower': 20}
-    mouse_button_pressed = False
-    # id
-    focus_on = None
-    time = 20
-    # next id of in-game objects
-    enemy_id = 0
-    turrets_id = 0
-    wave_size = 10
-    current_pos = (0, 0)
-    fps = 60
-
-    # objects case
-    wave_queue = dict()
-    all_turrets = dict()
-    all_enemies_on_map = dict()
-
-    # waves params
-    current_wave = 0  # for up enemy hp
-    time_between_waves = 20 * 1000  # can be changed in settings
-
-    # in-game objects
-    menu = None
-    game_map = None
-
-    # flags
-    pause_flag = False
 
     def __init__(self, difficult, path_to_map) -> None:
+        self.money = 30
+        self.COSTS = {'InfernoTower': 20}
+        self.mouse_button_pressed = False
+        # id
+        self.focus_on = None
+        self.time = 20
+        # next id of in-game objects
+        self.enemy_id = 0
+        self.turrets_id = 0
+        self.wave_size = 10
+        self.current_pos = (0, 0)
+        self.fps = 60
+
+        # objects case
+        self.wave_queue = dict()
+        self.all_turrets = dict()
+        self.all_enemies_on_map = dict()
+
+        # waves params
+        self.current_wave = 0  # for up enemy hp
+        self.time_between_waves = 20 * 1000  # can be changed in settings
+
+        # in-game objects
+        self.menu = None
+        self.game_map = None
+
+        # flags
+        self.pause_flag = False
         self.difficult = difficult
         self.base_hp = 12 - difficult * 2
         self.game_map = GameMap(path_to_map)

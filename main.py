@@ -44,8 +44,8 @@ def menu() -> int:
     map_creator = PushButton(x, 50, 20, 10)
     user_leves = PushButton(x, 62, 20, 10)
     settings = PushButton(x, 74, 20, 10)
-    exit_btn = PushButton(x, 86, 20, 10)
-
+    # exit_btn = PushButton(x, 86, 20, 10)
+    exit_btn = PushButton(x, 74, 20, 10)
     easy_game.background_color, easy_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
     medium_game.background_color, medium_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
     hard_game.background_color, hard_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
@@ -85,7 +85,7 @@ def menu() -> int:
     objects.append(hard_game)
     objects.append(map_creator)
     objects.append(user_leves)
-    objects.append(settings)
+    # objects.append(settings)
     objects.append(exit_btn)
     objects.append(name)
 
@@ -131,12 +131,14 @@ while running:
     if game_state in (1, 2, 3, 4):  # New game
         game = Game(game_state, 'levels/common.txt')
         game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
+        del game
     if game_state == 5:  # Map creator
         mp = MapCreator()
         game_state, screen = mp.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
     if game_state == 6:  # challenges
         game = Game(1, 'levels/user_level.txt')
         game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
+        del game
     if game_state == 7:  # settings
         pass
     if game_state == 8:  # for exit
