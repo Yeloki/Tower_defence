@@ -23,8 +23,8 @@ def distance(point1, point2):
     return abs(((point2[1] - point1[1]) ** 2 + (point2[0] - point1[0]) ** 2) ** 0.5)
 
 
-def distance_to_vector(point1, vec: Vector):
-    x, y = point1
+def near_point_on_vector(point, vec: Vector):
+    x, y = point
     x1, y1 = vec.begin()
     x2, y2 = vec.end()
     l = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
@@ -36,14 +36,17 @@ def distance_to_vector(point1, vec: Vector):
         cf = 1
     x_res = x1 + cf * (x2 - x1)
     y_res = y1 + cf * (y2 - y1)
-    return distance(point1, (x_res, y_res))
+    return x_res, y_res
+
+
+def distance_to_vector(point, vec: Vector):
+    return distance(point, near_point_on_vector(point, vec))
 
 
 def rot_center(image, angle):
     """rotate an image while keeping its center and size"""
-    orig_rect = image.get_rect()
     rot_image = transform.rotate(image, angle)
-    rot_rect = orig_rect.copy()
+    rot_rect = image.get_rect().copy()
     rot_rect.center = rot_image.get_rect().center
     rot_image = rot_image.subsurface(rot_rect).copy()
     return rot_image

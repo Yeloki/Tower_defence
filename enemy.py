@@ -60,7 +60,7 @@ class Enemy:
         screen.blit(enemy[self.wave % 4][(self.alpha + 90 + randint(-5, 5)) % 360],
                     (int(self.x) - 20 + randint(-1, 1), int(self.y) - 20 + randint(-1, 1)))
         lb.update(screen)
-        print(self.alpha)
+        # print(self.alpha)
         return STATUSES[self.current_status]
 
     def move(self) -> None:

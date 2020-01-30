@@ -6,10 +6,15 @@ from pygame.locals import *
 from gui import draw_better_line
 from other import distance
 
-inferno1 = transform.scale(image.load('images/inferno1-5.png'), (40, 40))
-inferno2 = transform.scale(image.load('images/inferno6-12.png'), (40, 40))
-inferno3 = transform.scale(image.load('images/inferno13-19.png'), (40, 40))
-inferno4 = transform.scale(image.load('images/inferno_20.png'), (40, 40))
+inferno1 = transform.scale(image.load('images/3.jpg'), (40, 40))
+inferno2 = transform.scale(image.load('images/4.jpg'), (40, 40))
+inferno3 = transform.scale(image.load('images/2.jpg'), (40, 40))
+inferno4 = transform.scale(image.load('images/5.jpg'), (40, 40))
+
+inferno1.set_colorkey(Color(255, 255, 255))
+inferno2.set_colorkey(Color(255, 255, 255))
+inferno3.set_colorkey(Color(255, 255, 255))
+inferno4.set_colorkey(Color(255, 255, 255))
 
 
 # inferno = [inferno1, inferno2, inferno3, inferno4]
@@ -110,7 +115,7 @@ class InfernoTower:
     def get_costs_of_upgrades(self):
         out = [self.damage_update_cost, self.range_update_cost]
         out2 = [self.i, self.j]
-        return tuple(zip(('Upgrade damage.\nCost:' + str(self.damage_update_cost), 'Upgrade range.\nCost: ' + str(
+        return tuple(zip(('Upgrade damage\nCost:' + str(self.damage_update_cost), 'Upgrade range\nCost: ' + str(
             self.range_update_cost)), out, out2))
 
     def characteristics(self):

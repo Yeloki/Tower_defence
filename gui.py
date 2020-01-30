@@ -37,7 +37,7 @@ def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None):
     return None
 
 
-def draw_better_line(screen, point1: tuple, point2: tuple, color, width):
+def draw_better_line(screen, point1, point2, color, width):
     x1, y1, x2, y2 = *point1, *point2
     dx = x2 - x1
     dy = y2 - y1
@@ -55,7 +55,6 @@ def draw_better_line(screen, point1: tuple, point2: tuple, color, width):
     # "right" line start
     x1__ = x1 - perpx
     y1__ = y1 - perpy
-
     # "right" line start
     x2__ = x1__ + dx
     y2__ = y1__ + dy
@@ -206,9 +205,10 @@ class PushButton:
         font = pygame.font.SysFont(self.font, self.font_size)
         for i, line in enumerate(lines):
             text = font.render(str(line), 1, self.text_color)
+            text_w = text.get_width()
             text_h = text.get_height()
             screen.blit(text,
-                        (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
+                        ((self.rect[2] - text_w) // 2 + (self.rect[0]), self.rect[1] + (text_h - self.rect[4]) * i))
 
 
 class PixelLabel:
@@ -289,12 +289,6 @@ class GameMenu:
         # self.buttons.append(prev_tower)
         pass
 
-    def load_upgrades(self, upgrades):
-        pass
-
-    def load_characteristics(self, characteristics):
-        pass
-
     def event_handler(self, event):
         if self.rect is None:
             return
@@ -352,4 +346,72 @@ class GameMenu:
 
         self.time_before_new_wave.update(menu)
         updater(self.buttons, menu)
+        screen.blit(menu, (self.rect[0], self.rect[1]))
+
+
+class MapCreatorMenu:
+    labels = list()
+    height = 15
+    rect = None
+
+    def __init__(self):
+        self.is_base_built = False
+        self.new_point = PushButton(0, 0, 10, 50)
+        self.new_point.text = 'new\npoint'
+        self.new_point.background_color, self.new_point.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
+        self.new_point.handler = 1
+        self.new_point.alpha = 200
+
+        self.set_base = PushButton(0, 50, 10, 50)
+        self.set_base.text = 'set\nbase'
+        self.set_base.background_color, self.set_base.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
+        self.set_base.handler = 2
+        self.set_base.alpha = 200
+
+        self.save_map = PushButton(10, 0, 10, 50)
+        self.save_map.text = 'save\nmap'
+        self.save_map.background_color, self.save_map.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
+        self.save_map.handler = 3
+        self.save_map.alpha = 200
+
+        self.load_map = PushButton(10, 50, 10, 50)
+        self.load_map.text = 'load\nmap'
+        self.load_map.background_color, self.load_map.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
+        self.load_map.handler = 4
+        self.load_map.alpha = 200
+
+    def resize(self, screen) -> None:
+        screen_height, screen_width = screen.get_height(), screen.get_width()
+        self.rect = (
+            int(screen_width * 0 / 100),
+            int(screen_height * (100 - self.height) / 100),
+            int(screen_width),
+            int(screen_height * self.height / 100)
+        )
+        return None
+
+    def event_handler(self, event):
+        if self.rect is None:
+            return
+        else:
+            if not self.is_base_built:
+                a = emit_event_to_objects((self.set_base, self.new_point, self.save_map, self.load_map), event,
+                                          *self.rect[:2])
+            else:
+                a = emit_event_to_objects((self.new_point, self.save_map, self.load_map), event,
+                                          *self.rect[:2])
+        return a
+
+    def update(self, screen, is_base_built):
+        self.is_base_built = is_base_built
+        if self.rect is None:
+            self.resize(screen)
+        menu = pygame.Surface(self.rect[2:], pygame.SRCALPHA)
+        menu.fill(pygame.Color(100, 50, 100, 100))
+        # update code put here
+        self.new_point.update(menu)
+        if not is_base_built:
+            self.set_base.update(menu)
+        self.save_map.update(menu)
+        self.load_map.update(menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))

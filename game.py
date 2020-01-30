@@ -28,9 +28,8 @@ class GameMap:
 
     def __init__(self, path_to_map):
         file = open(path_to_map, 'r').readlines()
-        self.x_size, self.y_size = map(int, file[0].split()[:-1])
-        self.base_size = tuple(map(int, file[1].split()))
-        file = tuple(map(lambda x: tuple(map(int, x.split())), file[2:]))
+        self.base_size = tuple(map(int, file[0].split()))
+        file = tuple(map(lambda x: tuple(map(int, x.split())), file[1:]))
         self.dots = [i for i in file]
         self.game_map = [Vector(*file[i], *file[i + 1]) for i in range(len(file) - 1)]
         print(file)
@@ -190,10 +189,6 @@ class Game:
         screen_width = screen.get_width()
         screen_height = screen.get_height()
 
-        # states and other params
-        out_state = 0
-        state = None  # this param store value from self.menu.event_handler()
-
         # id for time-depends events
         second = 30
 
@@ -202,7 +197,7 @@ class Game:
         self.menu = GameMenu()
         want_to_build_type = None
         want_to_build_flag = False
-        while out_state == 0 or out_state is None:  # main game-loop
+        while True:  # main game-loop
             screen.fill(pygame.Color(255, 0, 0))
             state = None
             for event in pygame.event.get():  # event handler cycle begin
@@ -227,6 +222,9 @@ class Game:
                         self.money += 10000
                     if event.key == K_F4 and event.mod in (512, 256):
                         return 8, screen
+                    if event.key == K_ESCAPE:
+                        return 0, screen
+
                     if event.key == K_SPACE:
                         self.next_wave_sender()
                         self.time = 20
@@ -298,12 +296,13 @@ class Game:
                           self.current_pos,
                           TOWERS[want_to_build_type].radius_size,
                           TOWERS[want_to_build_type].range_of_attack,
-                          self.collision(self.current_pos, TOWERS[want_to_build_type].radius_size, want_to_build_type,
+                          self.collision(self.current_pos,
+                                         TOWERS[want_to_build_type].radius_size,
+                                         want_to_build_type,
                                          screen))
-
+            if self.base_hp <= 0:
+                return 9, screen
             # fps wait and flip the display
             clock.tick(self.fps)
             pygame.display.flip()
             # end game-loop
-
-        return out_state, screen

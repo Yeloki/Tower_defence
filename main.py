@@ -5,6 +5,7 @@ from pygame.locals import *
 
 from game import Game
 from gui import *
+from map_creator import MapCreator
 
 # from test import *
 
@@ -41,7 +42,7 @@ def menu() -> int:
     medium_game = PushButton(x, 26, 20, 10)
     hard_game = PushButton(x, 38, 20, 10)
     map_creator = PushButton(x, 50, 20, 10)
-    challenges = PushButton(x, 62, 20, 10)
+    user_leves = PushButton(x, 62, 20, 10)
     settings = PushButton(x, 74, 20, 10)
     exit_btn = PushButton(x, 86, 20, 10)
 
@@ -49,7 +50,7 @@ def menu() -> int:
     medium_game.background_color, medium_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
     hard_game.background_color, hard_game.text_color = Color(255, 255, 255), Color(0, 0, 0)
     map_creator.background_color, map_creator.text_color = Color(255, 255, 255), Color(0, 0, 0)
-    challenges.background_color, challenges.text_color = Color(255, 255, 255), Color(0, 0, 0)
+    user_leves.background_color, user_leves.text_color = Color(255, 255, 255), Color(0, 0, 0)
     settings.background_color, settings.text_color = Color(255, 255, 255), Color(0, 0, 0)
     exit_btn.background_color, exit_btn.text_color = Color(255, 255, 255), Color(0, 0, 0)
     name.text_color = Color(255, 255, 255)
@@ -57,7 +58,7 @@ def menu() -> int:
     medium_game.alpha = 200
     hard_game.alpha = 200
     map_creator.alpha = 200
-    challenges.alpha = 200
+    user_leves.alpha = 200
     settings.alpha = 200
     exit_btn.alpha = 200
 
@@ -65,7 +66,7 @@ def menu() -> int:
     medium_game.text = 'Medium mode'
     hard_game.text = 'Hard mode'
     map_creator.text = 'Map creator'
-    challenges.text = 'Challenges'
+    user_leves.text = 'User leves'
     settings.text = 'Settings'
     exit_btn.text = 'Exit'
     name.text = 'Onslaught'
@@ -73,8 +74,9 @@ def menu() -> int:
     easy_game.handler = 1
     medium_game.handler = 2
     hard_game.handler = 3
-    map_creator.handler = None
-    challenges.handler = None
+    # impossible
+    map_creator.handler = 5
+    user_leves.handler = 6
     settings.handler = None
     exit_btn.handler = 8
 
@@ -82,14 +84,13 @@ def menu() -> int:
     objects.append(medium_game)
     objects.append(hard_game)
     objects.append(map_creator)
-    objects.append(challenges)
+    objects.append(user_leves)
     objects.append(settings)
     objects.append(exit_btn)
     objects.append(name)
 
     for elem in objects:
         elem.resize(screen)
-    result = list()
     while out_state == 0 or out_state is None:
         screen.blit(pygame.transform.scale(background, (screen_width, screen_height)), (0, 0))
         for event in pygame.event.get():
@@ -109,18 +110,36 @@ def menu() -> int:
     return out_state
 
 
+def death_screen():
+    global screen, screen_width, screen_height
+    background = pygame.image.load('images/GAME_OVER.jpg')
+    flag = True
+    while flag:
+        screen.blit(pygame.transform.scale(background, (screen_width, screen_height)), (0, 0))
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                return 8
+            if event.type == KEYDOWN:
+                flag = False
+        pygame.display.flip()
+    return 0
+
+
 while running:
     if game_state == 0:
         game_state = menu()
     if game_state in (1, 2, 3, 4):  # New game
         game = Game(game_state, 'levels/common.txt')
         game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
-
     if game_state == 5:  # Map creator
-        pass
+        mp = MapCreator()
+        game_state, screen = mp.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
     if game_state == 6:  # challenges
-        pass
+        game = Game(1, 'levels/user_level.txt')
+        game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
     if game_state == 7:  # settings
         pass
     if game_state == 8:  # for exit
         terminate()
+    if game_state == 9:  # death screen
+        game_state = death_screen()
