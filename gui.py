@@ -275,6 +275,14 @@ class GameMenu:
         self.money_label.text = '30$'
         self.money_label.text_color = pygame.Color(255, 255, 255)
 
+        self.current_wave = PercentLabel(75, 0, 10, 50)
+        self.current_wave.text = '0'
+        self.current_wave.text_color = pygame.Color(255, 255, 255)
+
+        self.kills = PercentLabel(75, 50, 10, 50)
+        self.kills.text = 'kills:\n0'
+        self.kills.text_color = pygame.Color(255, 255, 255)
+
         for i in range(5):
             self.characteristics_labels.append(PercentLabel(5 + 10 * (i + 2), 0, 10, 50))
             self.characteristics_labels[i].text_color = pygame.Color(255, 255, 255)
@@ -310,11 +318,12 @@ class GameMenu:
         )
         return None
 
-    def update(self, screen, time_to_next_wave, money, turret_id, turrets_list):
+    def update(self, screen, time_to_next_wave, money, turret_id, turrets_list, kills, cur_wave):
         self.turret_id = turret_id
         self.time_before_new_wave.text = 'Time before\nnext wave:' + str(time_to_next_wave)
         self.money_label.text = str(money) + '$'
-
+        self.current_wave.text = 'wave:\n' + str(cur_wave)
+        self.kills.text = 'kills:\n' + str(kills)
         if self.rect is None:
             self.resize(screen)
 
@@ -343,7 +352,8 @@ class GameMenu:
                     button.background_color = pygame.Color(0, 255, 0)
                 button.update(menu)
             self.count_of_characteristics = len(turrets_list[self.turret_id].get_costs_of_upgrades())
-
+        self.current_wave.update(menu)
+        self.kills.update(menu)
         self.time_before_new_wave.update(menu)
         updater(self.buttons, menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))
@@ -398,8 +408,7 @@ class MapCreatorMenu:
                 a = emit_event_to_objects((self.set_base, self.new_point, self.save_map, self.load_map), event,
                                           *self.rect[:2])
             else:
-                a = emit_event_to_objects((self.new_point, self.save_map, self.load_map), event,
-                                          *self.rect[:2])
+                a = emit_event_to_objects((self.new_point, self.save_map, self.load_map), event, *self.rect[:2])
         return a
 
     def update(self, screen, is_base_built):
@@ -408,7 +417,6 @@ class MapCreatorMenu:
             self.resize(screen)
         menu = pygame.Surface(self.rect[2:], pygame.SRCALPHA)
         menu.fill(pygame.Color(100, 50, 100, 100))
-        # update code put here
         self.new_point.update(menu)
         if not is_base_built:
             self.set_base.update(menu)

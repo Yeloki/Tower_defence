@@ -41,7 +41,6 @@ class GameMap:
         screen_width, screen_height = screen.get_width(), screen.get_height()
         screen.blit(pygame.transform.scale(self.background, (screen_width, screen_height)), (0, 0))
         for vec in self.game_map:
-            # pygame.draw.line(screen, pygame.Color(0,62,141), vec.begin(), vec.end(), self.line_width * 2)
             draw_better_line(screen, vec.begin(), vec.end(), pygame.Color(0, 62, 141), self.line_width)
         for dot in self.dots:
             pygame.draw.circle(screen, pygame.Color(0, 62, 141), dot, self.line_width)
@@ -61,30 +60,24 @@ class Game:
         self.money = 30
         self.COSTS = {'InfernoTower': 20}
         self.mouse_button_pressed = False
-        # id
         self.focus_on = None
         self.time = 20
-        # next id of in-game objects
+
         self.enemy_id = 0
         self.turrets_id = 0
         self.wave_size = 10
         self.current_pos = (0, 0)
         self.fps = 60
-
-        # objects case
         self.wave_queue = dict()
         self.all_turrets = dict()
         self.all_enemies_on_map = dict()
 
-        # waves params
-        self.current_wave = 0  # for up enemy hp
-        self.time_between_waves = 20 * 1000  # can be changed in settings
+        self.current_wave = 0
+        self.time_between_waves = 20 * 1000
 
-        # in-game objects
         self.menu = None
         self.game_map = None
-
-        # flags
+        self.kills = 0
         self.pause_flag = False
         self.difficult = difficult
         self.base_hp = 12 - difficult * 2
@@ -115,6 +108,7 @@ class Game:
             status = enemy.update(screen)
             if status == STATUSES['ENEMY_STATUS_DIED']:
                 self.money += self.all_enemies_on_map[enemy_id].wave
+                self.kills += 1
                 delete.append(enemy_id)
                 continue
             if status == STATUSES['ENEMY_STATUS_TO_GET_TO_BASE']:
@@ -133,7 +127,6 @@ class Game:
         self.current_wave += 1
         self.wave_queue[self.current_wave] = [0, self.wave_size]
         self.enemies_sender(self.current_wave)
-        # pygame.time.set_timer(self.current_wave, ())
 
     def enemies_sender(self, ev_id):
         print('send')
@@ -201,7 +194,6 @@ class Game:
             screen.fill(pygame.Color(255, 0, 0))
             state = None
             for event in pygame.event.get():  # event handler cycle begin
-                # menu handle
                 state = self.menu.event_handler(event)
 
                 if event.type == QUIT:
@@ -285,11 +277,16 @@ class Game:
             if state in (3, 4, 5, 6, 7):  # reserved for upgrades
                 self.turret_upgrade(state - 3)
 
-            # screen update (DON'T CHANGE THE DRAWING ORDER)
             self.game_map.update(screen, self.base_hp)
             self.update_enemies(screen)
             self.update_turrets(screen)
-            self.menu.update(screen, self.time, self.money, self.focus_on, self.all_turrets)
+            self.menu.update(screen,
+                             self.time,
+                             self.money,
+                             self.focus_on,
+                             self.all_turrets,
+                             self.kills,
+                             self.current_wave)
 
             if want_to_build_flag:
                 prototype(screen,
