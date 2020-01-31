@@ -1,12 +1,13 @@
 from time import time as global_time
 
 from pygame.constants import *
+from pygame.draw import aaline
 
 from enemy import Enemy
 from gui import *
 from other import Vector
 from other import distance, distance_to_vector
-from turrets import TOWERS, prototype
+from turrets import TOWERS, prototype, COSTS
 
 STATUSES = dict()
 buffer = open('CONSTS', 'r')
@@ -58,7 +59,6 @@ class Game:
 
     def __init__(self, difficult, path_to_map) -> None:
         self.money = 30
-        self.COSTS = {'InfernoTower': 20}
         self.mouse_button_pressed = False
         self.focus_on = None
         self.time = 20
@@ -82,12 +82,6 @@ class Game:
         self.difficult = difficult
         self.base_hp = 12 - difficult * 2
         self.game_map = GameMap(path_to_map)
-
-    def load_map(self):
-        pass
-
-    def update(self, screen) -> None:
-        pass
 
     def detected_enemy(self):
         a = distance
@@ -119,9 +113,14 @@ class Game:
             del self.all_enemies_on_map[enemy_id]
 
     def update_turrets(self, screen):
+        lines = []
         for turret_id, turret in self.all_turrets.items():
             turret.shoot(self.all_enemies_on_map)
-            turret.update(screen, self.all_enemies_on_map)
+            line = turret.update(screen, self.all_enemies_on_map)
+            lines.append(line) if line is not None else None
+        for line in lines:
+            draw_better_line(screen, line[0].begin(), line[0].end(), line[1][0], 2)
+            aaline(screen, line[1][1], line[0].begin(), line[0].end())
 
     def next_wave_sender(self):
         self.current_wave += 1
@@ -141,7 +140,7 @@ class Game:
     def collision(self, pos, r, tower_type, screen) -> bool:
         screen_width = screen.get_width()
         screen_height = screen.get_height()
-        if self.money < self.COSTS[tower_type] or self.menu.rect is None:
+        if self.money < COSTS[tower_type] or self.menu.rect is None:
             return True
         test = []
         for vec in self.game_map.get_map():
@@ -167,7 +166,7 @@ class Game:
     def build_tower(self, tower_type, pos):
 
         self.all_turrets[self.turrets_id] = TOWERS[tower_type](*pos)
-        self.money -= self.COSTS[tower_type]
+        self.money -= COSTS[tower_type]
         self.turrets_id = (self.turrets_id + 1) % 100000
 
         pass
@@ -274,8 +273,12 @@ class Game:
                 print('built')
                 want_to_build_flag = True
                 want_to_build_type = 'InfernoTower'
-            if state in (3, 4, 5, 6, 7):  # reserved for upgrades
-                self.turret_upgrade(state - 3)
+            if state == 3:
+                print('built')
+                want_to_build_flag = True
+                want_to_build_type = 'LaserTower'
+            if state in (5, 6, 7, 8, 9):  # reserved for upgrades
+                self.turret_upgrade(state - 5)
 
             self.game_map.update(screen, self.base_hp)
             self.update_enemies(screen)

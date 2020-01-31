@@ -119,7 +119,7 @@ def death_screen():
         for event in pygame.event.get():
             if event.type == QUIT:
                 return 8
-            if event.type == KEYDOWN:
+            if event.type == KEYDOWN or event.type == MOUSEBUTTONDOWN:
                 flag = False
         pygame.display.flip()
     return 0

@@ -261,7 +261,6 @@ class MapCreator:
                             if want_to_place_type == 'base':
                                 self.set_base(event.pos)
                         want_to_place_flag = False
-
             if state == 1:
                 want_to_place_flag = True
                 want_to_place_type = 'point'

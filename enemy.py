@@ -1,4 +1,5 @@
 from random import randint
+from time import time
 
 from pygame import image, transform
 
@@ -31,11 +32,20 @@ class Enemy:
     abs_r_size = None
     game_map = None
     image = None
-    alpha = 0
+    angle = 0
     last_image = None
     current_status = 'ENEMY_STATUS_A_LIFE'
 
     def __init__(self, game_map: list, wave=1, difficult=1) -> None:
+        self.freeze_time = 0
+        self.time_last_freeze = time()
+        self.freeze_flag = False
+
+        self.burn_flag = False
+        self.burn_time = 0
+        self.time_last_burn = time()
+        self.burn_damage = 0
+
         self.game_map = game_map
         self.wave = wave
         self.hp = 100 + (wave - 1) * (difficult * 7)
@@ -56,27 +66,50 @@ class Enemy:
         lb = PixelLabel(int(self.x), int(self.y - self.abs_r_size * 1.5))
         lb.fix = 2
         lb.text = text
-        screen.blit(enemy[self.wave % 4][(90 + self.alpha) % 360],
+        screen.blit(enemy[self.wave % 4][self.angle],
                     (int(self.x) - 20 + randint(-1, 1), int(self.y) - 20 + randint(-1, 1)))
         lb.update(screen)
         return STATUSES[self.current_status]
 
+    def freeze(self, freeze_time):
+        self.time_last_freeze = time()
+        self.freeze_time = freeze_time
+        self.freeze_flag = True
+        self.burn_flag = False
+
+    def burn(self, burn_time, burn_damage):
+        self.time_last_burn = time()
+        self.burn_time = burn_time
+        self.burn_damage = burn_damage
+        self.freeze_flag = False
+        self.burn_flag = True
+
     def move(self) -> None:
         from math import atan, degrees
+        if self.freeze_flag:
+            speed = self.speed / 2
+            if time() - self.time_last_freeze >= self.freeze_time:
+                self.freeze_flag = False
+        else:
+            speed = self.speed
+        if self.burn_flag:
+            self.get_damage(self.burn_damage)
+            if time() - self.time_last_burn >= self.burn_time:
+                self.burn_flag = False
         print(self.i)
-        print(self.speed)
+        print(speed)
         print(distance((self.x, self.y), self.game_map[self.i].end()))
-        if distance((self.x, self.y), self.game_map[self.i].end()) <= self.speed * 2:
+        if distance((self.x, self.y), self.game_map[self.i].end()) <= speed * 2:
             if self.i + 1 == len(self.game_map):
                 self.current_status = 'ENEMY_STATUS_TO_GET_TO_BASE'
             else:
-                if distance((self.x, self.y), self.game_map[self.i].end()) > self.speed:
-                    self.x += self.speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
-                    self.y += self.speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
+                if distance((self.x, self.y), self.game_map[self.i].end()) > speed:
+                    self.x += speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
+                    self.y += speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
                 self.i += 1
 
-        self.x += self.speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
-        self.y += self.speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
+        self.x += speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
+        self.y += speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
         print(self.i)
         if self.x < 0:
             print(self.game_map[self.i].begin(), self.game_map[self.i].end())
@@ -91,9 +124,9 @@ class Enemy:
                     ((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) <= 0 < (
                             self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0])):
                 k = -180
-            self.alpha = int(degrees(atan(tan))) + randint(-5, 5) + k
+            self.angle = (90 + int(degrees(atan(tan))) + randint(-5, 5) + k) % 360
         except ZeroDivisionError:
-            self.alpha = -90 - randint(-5, 5) % 360
+            self.angle = randint(-5, 5) % 360
 
     def pos(self):
         return self.x, self.y

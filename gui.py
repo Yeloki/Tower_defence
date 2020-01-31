@@ -2,10 +2,14 @@ import math
 
 import pygame
 
+from turrets import TOWERS, COSTS
+
+used_font = 'bahnschrift'
+# used_font = 'calibri'
 pygame.init()
 NUMS = dict()
 size = 18
-font = pygame.font.SysFont('Comic Sans MS', size)
+font = pygame.font.SysFont(used_font, size)
 for i in range(101):
     NUMS[i] = font.render(str(i), 1, pygame.Color(255, 255, 255))
 del font, i, size
@@ -72,7 +76,6 @@ class PercentLabel:
     rect = None
     text_color: pygame.Color = pygame.Color(0, 0, 0)
     text: str = ''
-    font: str = 'Comic Sans MS'
     font_size = None
     fix: int = 0.1
 
@@ -85,7 +88,7 @@ class PercentLabel:
         max_width = 0
         best = 1
         for size in range(1, 1000):
-            font = pygame.font.SysFont('Comic Sans MS', size)
+            font = pygame.font.SysFont(used_font, size)
             for i, elem in enumerate(lines):
                 text = font.render(str(elem), 1, self.text_color)
                 max_height = max(text.get_height(), max_height)
@@ -111,7 +114,7 @@ class PercentLabel:
         if self.rect is None or self.font_size is None:
             self.resize(screen)
         lines = self.text.split('\n')
-        font = pygame.font.SysFont(self.font, self.font_size)
+        font = pygame.font.SysFont(used_font, self.font_size)
         for i, line in enumerate(lines):
             text = font.render(str(line), 1, self.text_color)
             text_h = text.get_height()
@@ -136,7 +139,6 @@ class PushButton:
     alpha: int = 200
     text: str = ''
     flag: bool = False
-    font: str = 'Comic Sans MS'
     font_size = None
     fix: int = 0.1
     handler: None
@@ -170,7 +172,7 @@ class PushButton:
         max_width = 0
         best = 1
         for size in range(1, 100):
-            font = pygame.font.SysFont('Comic Sans MS', size)
+            font = pygame.font.SysFont(used_font, size)
             for i, elem in enumerate(lines):
                 text = font.render(str(elem), 1, self.text_color)
                 max_height = max(text.get_height(), max_height)
@@ -202,7 +204,7 @@ class PushButton:
         button.set_alpha(min(self.alpha + 50, 255) if self.triggered else self.alpha)
         screen.blit(button, (self.rect[0], self.rect[1]))
         lines = self.text.split('\n')
-        font = pygame.font.SysFont(self.font, self.font_size)
+        font = pygame.font.SysFont(used_font, self.font_size)
         for i, line in enumerate(lines):
             text = font.render(str(line), 1, self.text_color)
             text_w = text.get_width()
@@ -235,7 +237,7 @@ class PixelLabel:
 
 
 class GameMenu:
-    buttons = list()
+    # buttons = list()
     labels = list()
     height = 15
     rect = None
@@ -243,29 +245,33 @@ class GameMenu:
     characteristics_labels = []
     count_of_characteristics = 0
     characteristics_upgrades_buttons = []
+    towers = [tower for tower, _ in TOWERS.items()]
+    current_tower = 0
 
     def __init__(self):
-        next_wave = PushButton(7.5, 0, 10, 50)
-        next_wave.background_color = pygame.Color('red')
-        next_wave.text_color = pygame.Color(255, 255, 255)
-        next_wave.text = 'next\nwave'
-        next_wave.handler = 1
-        next_wave.alpha = 200
+        self.towers = [tower_type for tower_type, _ in TOWERS.items()]
+        self.next_wave = PushButton(7.5, 0, 10, 50)
+        self.next_wave.background_color = pygame.Color('red')
+        self.next_wave.text_color = pygame.Color(255, 255, 255)
+        self.next_wave.text = 'next\nwave'
+        self.next_wave.handler = 1
+        self.next_wave.alpha = 200
 
-        build_tower = PushButton(7.5, 50, 10, 50)
-        build_tower.background_color = pygame.Color('red')
-        build_tower.text_color = pygame.Color(255, 255, 255)
-        build_tower.text = 'build\ninferno tower\ncost: 20$'
-        build_tower.handler = 2
-        build_tower.alpha = 200
+        self.build_tower = PushButton(7.5, 50, 10, 50)
+        self.build_tower.background_color = pygame.Color('red')
+        self.build_tower.text_color = pygame.Color(255, 255, 255)
+        self.build_tower.text = f'build\n{self.towers[self.current_tower]}\ncost: ' \
+                                f'{str(COSTS[self.towers[self.current_tower]])}$'
+        self.build_tower.handler = 2
+        self.build_tower.alpha = 200
 
-        prev_tower = PushButton(0, 50, 7.5, 50)
-        prev_tower.text = '<-'
-        prev_tower.handler = -1
+        self.prev_tower = PushButton(0, 50, 7.5, 50)
+        self.prev_tower.text = '<-'
+        self.prev_tower.handler = -1
 
-        next_tower = PushButton(17.5, 50, 7.5, 50)
-        next_tower.text = '->'
-        next_tower.handler = 1
+        self.next_tower = PushButton(17.5, 50, 7.5, 50)
+        self.next_tower.text = '->'
+        self.next_tower.handler = 1
 
         self.time_before_new_wave = PercentLabel(85, 0, 15, 50)
         self.time_before_new_wave.text = '20'
@@ -290,9 +296,9 @@ class GameMenu:
             self.characteristics_upgrades_buttons.append(PushButton(5 + 10 * (i + 2), 50, 10, 50))
             self.characteristics_upgrades_buttons[i].alpha = 200
             self.characteristics_upgrades_buttons[i].background_color = pygame.Color('red')
-            self.characteristics_upgrades_buttons[i].handler = i + 3
-        self.buttons.append(next_wave)
-        self.buttons.append(build_tower)
+            self.characteristics_upgrades_buttons[i].handler = i + 5
+        # self.buttons.append(next_wave)
+        # self.buttons.append(build_tower)
         # self.buttons.append(next_tower)
         # self.buttons.append(prev_tower)
         pass
@@ -300,12 +306,20 @@ class GameMenu:
     def event_handler(self, event):
         if self.rect is None:
             return
+        i = emit_event_to_objects((self.next_tower, self.prev_tower), event, *self.rect[:2])
+        self.current_tower = (self.current_tower + (i if i is not None else 0)) % len(self.towers)
+        if i is not None:
+            self.build_tower.handler = 2 + self.current_tower
+            self.build_tower.text = f'build\n{self.towers[self.current_tower]}\ncost: ' \
+                                    f'{str(COSTS[self.towers[self.current_tower]])}$'
         if self.turret_id is not None:
             a = emit_event_to_objects(
-                (*self.buttons, *self.characteristics_upgrades_buttons[:self.count_of_characteristics]), event,
-                *self.rect[:2])
+                (self.next_wave,
+                 self.build_tower,
+                 *self.characteristics_upgrades_buttons[:self.count_of_characteristics]), event, *self.rect[:2])
         else:
-            a = emit_event_to_objects(self.buttons, event, *self.rect[:2])
+            a = emit_event_to_objects((self.next_wave, self.build_tower,), event, *self.rect[:2])
+        print(self.current_tower)
         return a
 
     def resize(self, screen) -> None:
@@ -355,7 +369,9 @@ class GameMenu:
         self.current_wave.update(menu)
         self.kills.update(menu)
         self.time_before_new_wave.update(menu)
-        updater(self.buttons, menu)
+        self.prev_tower.update(menu)
+        self.next_tower.update(menu)
+        updater((self.build_tower, self.next_wave), menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))
 
 

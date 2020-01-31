@@ -1,20 +1,28 @@
+from math import atan, degrees
+from time import time
+
 from pygame import Color, Surface
 from pygame import image, transform
-from pygame.draw import circle, aaline
+from pygame.draw import circle
 from pygame.locals import *
 
-from gui import draw_better_line
-from other import distance
+from other import distance, rot_center, Vector
 
 inferno1 = transform.scale(image.load('images/3.jpg'), (40, 40))
 inferno2 = transform.scale(image.load('images/4.jpg'), (40, 40))
 inferno3 = transform.scale(image.load('images/2.jpg'), (40, 40))
 inferno4 = transform.scale(image.load('images/5.jpg'), (40, 40))
-
+laser_tower = list()
 inferno1.set_colorkey(Color(255, 255, 255))
 inferno2.set_colorkey(Color(255, 255, 255))
 inferno3.set_colorkey(Color(255, 255, 255))
 inferno4.set_colorkey(Color(255, 255, 255))
+image = transform.scale(image.load('images/1.jpg'), (80, 80))
+image.set_colorkey(Color(255, 255, 255))
+for i in range(359, -1, -1):
+    laser_tower.append(rot_center(image, i))
+
+del image
 
 
 # inferno = [inferno1, inferno2, inferno3, inferno4]
@@ -42,7 +50,7 @@ class InfernoTower:
         self.triggered = False
         self.target_id = -1
 
-    def update(self, screen, enemies) -> None:
+    def update(self, screen, enemies) -> (None, (Vector, Color)):
         surface = Surface((self.range_of_attack * 2, self.range_of_attack * 2), SRCALPHA)
         if self.triggered:
             circle(surface, Color(0, 255, 0, 25), (self.range_of_attack, self.range_of_attack), self.range_of_attack)
@@ -64,7 +72,6 @@ class InfernoTower:
             surface.blit(inferno3, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
             screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
             color_key = 2
-
         else:
             surface.blit(inferno4, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
             screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
@@ -72,8 +79,10 @@ class InfernoTower:
 
         if self.target_id == -1 or self.target_id not in enemies:
             return
-        draw_better_line(screen, self.pos(), enemies[self.target_id].pos(), colors[color_key][0], 2)
-        aaline(screen, colors[color_key][1], self.pos(), enemies[self.target_id].pos())
+        return Vector(*self.pos(), *enemies[self.target_id].pos()), colors[color_key]
+
+    # def description(self):
+    #     return ''
 
     def upgrade(self, type_of_characteristics):
         if type_of_characteristics == 0 and self.i != self.max_upgrade_damage_count:
@@ -106,7 +115,8 @@ class InfernoTower:
         if distance(enemies[self.target_id].pos(), self.pos()) >= self.range_of_attack:
             self.target_id = -1
             return
-        enemies[self.target_id].get_damage(self.damage // 60)
+        # enemies[self.target_id].get_damage(self.damage // 60)
+        enemies[self.target_id].burn(0.5, self.damage / 60)
 
     def get_characteristics(self):
         out = [self.i, self.j]
@@ -130,9 +140,129 @@ def prototype(screen, pos: (int, int), r, turret_range, collision: bool):
     screen.blit(surface, (pos[0] - turret_range, pos[1] - turret_range))
 
 
-class GunTower:
-    def __init__(self):
-        pass
+class LaserTower:
+    radius_size = 20
+    # damage
+
+    damage = 60
+    damage_update_cost = 20
+    damage_update_value = 60
+    i = 1  # count of updates (damage)
+    max_upgrade_damage_count = 10
+
+    # range
+    range_of_attack = 200
+    j = 1  # count of updates (range)
+    range_update_cost = 10
+    range_update_value = 25
+    max_upgrade_range_count = 10
+
+    rate = 1
+    h = 1  # count of updates (rate)
+    rate_update_cost = 10
+    rate_upgrade_value = 1
+    max_upgrade_rate_count = 10
+
+    def __init__(self, x, y):
+        self.shoot_flag = False
+        self.last_shoot_time = time()
+        self.angle = 0
+        self.triggered = False
+        self.target_id = -1
+        self.x, self.y = x, y
+
+    def pos(self):
+        return self.x, self.y
+
+    def range(self):
+        return self.range_of_attack
+
+    def disable_trigger(self):
+        self.triggered = False
+
+    def set_target(self, enemy_id):
+        self.target_id = enemy_id
+
+    def enable_trigger(self):
+        self.triggered = True
+
+    def upgrade(self, type_of_characteristics):
+        if type_of_characteristics == 0 and self.i != self.max_upgrade_damage_count:
+            self.damage += self.damage_update_value
+            self.damage_update_cost += 20 * self.i
+            self.i += 1
+        if type_of_characteristics == 1 and self.j != self.max_upgrade_range_count:
+            self.range_of_attack += self.range_update_value
+            self.range_update_cost += 20 * self.j
+            self.j += 1
+        if type_of_characteristics == 2 and self.h != self.max_upgrade_rate_count:
+            self.rate += self.rate_upgrade_value
+            self.rate_update_cost += 20 * self.h
+            self.h += 1
+
+    def shoot(self, enemies):
+        if self.target_id == -1 or self.target_id not in enemies:
+            return
+        if distance(enemies[self.target_id].pos(), self.pos()) >= self.range_of_attack:
+            self.target_id = -1
+            return
+        if time() - self.last_shoot_time >= 1 / self.rate:
+            self.last_shoot_time = time()
+            self.shoot_flag = True
+            enemies[self.target_id].get_damage(self.damage)
+            enemies[self.target_id].freeze(0.3)
+
+    def get_characteristics(self):
+        out = [self.i, self.j, self.h]
+        return tuple(zip(('damage:\n' + str(self.damage),
+                          'range:\n' + str(self.range_of_attack),
+                          'rate:\n' + str(self.rate)
+                          ), out))
+
+    def get_costs_of_upgrades(self):
+        out = [self.damage_update_cost, self.range_update_cost, self.rate_update_cost]
+        out2 = [self.i, self.j, self.h]
+        return tuple(zip(('Upgrade damage\nCost:' + str(self.damage_update_cost),
+                          'Upgrade range\nCost: ' + str(self.range_update_cost),
+                          'Upgrade rate\nCost: ' + str(self.rate_update_cost)
+                          ), out, out2))
+
+    def characteristics(self):
+        out = [self.i, self.j, self.h]
+        return tuple(zip((self.damage_update_cost,
+                          self.range_update_cost,
+                          self.rate_update_cost
+                          ), out))
+
+    # def description(self):
+    #     return ''
+
+    def update(self, screen, enemies) -> (None, (Vector, Color)):
+        surface = Surface((self.range_of_attack * 2, self.range_of_attack * 2), SRCALPHA)
+        if self.triggered:
+            circle(surface, Color(0, 255, 0, 25), (self.range_of_attack, self.range_of_attack),
+                   self.range_of_attack)
+        colors = Color(117, 4, 157), Color(255, 212, 255)
+        if self.target_id != -1 and self.target_id in enemies:
+            try:
+                k = 0
+                vec = Vector(*self.pos(), *enemies[self.target_id].pos())
+                tan = (vec.begin()[1] - vec.end()[1]) / (vec.begin()[0] - vec.end()[0])
+                if ((vec.begin()[1] - vec.end()[1]) > 0 and (vec.begin()[0] - vec.end()[0]) > 0) or \
+                        ((vec.begin()[1] - vec.end()[1]) <= 0 < (vec.begin()[0] - vec.end()[0])):
+                    k = -180
+                self.angle = (90 + int(degrees(atan(tan))) + k) % 360
+            except ZeroDivisionError:
+                self.angle = 0
+        surface.blit(laser_tower[self.angle],
+                     (self.range_of_attack - 2 * self.radius_size, self.range_of_attack - 2 * self.radius_size))
+        screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
+
+        if self.target_id == -1 or self.target_id not in enemies or not self.shoot_flag:
+            return
+        self.shoot_flag = False
+        return Vector(*self.pos(), *enemies[self.target_id].pos()), colors
 
 
-TOWERS = {'InfernoTower': InfernoTower}
+TOWERS = {'InfernoTower': InfernoTower, 'LaserTower': LaserTower}
+COSTS = {'InfernoTower': 20, 'LaserTower': 30}
