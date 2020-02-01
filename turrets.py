@@ -11,21 +11,21 @@ from other import distance, Vector
 
 class InfernoTower:
     radius_size = 20
-    range_of_attack = 200
+    range_of_attack = 130
 
     def __init__(self, x, y) -> None:
         # damage
-        self.damage = 120
+        self.damage = 240
 
-        self.damage_update_cost = 20
+        self.damage_update_cost = 40
         self.number_of_damage_improvements = 1  # count of updates (damage)
-        self.damage_update_value = 60
+        self.damage_update_value = 120
         self.max_upgrade_damage_count = 10
 
         # range
         self.number_of_improvements_of_range_of_attack = 1  # count of updates (range)
         self.range_update_cost = 10
-        self.range_update_value = 25
+        self.range_update_value = 15
         self.max_upgrade_range_count = 10
         # burn
         self.burning_time = 3
@@ -79,7 +79,7 @@ class InfernoTower:
             if self.number_of_damage_improvements != self.max_upgrade_damage_count:
                 self.damage += self.damage_update_value
                 self.summary_tower_cost += self.damage_update_cost
-                self.damage_update_cost += 20 * self.number_of_damage_improvements
+                self.damage_update_cost += 30 * self.number_of_damage_improvements
                 self.number_of_damage_improvements += 1
 
         if type_of_characteristics == 1:

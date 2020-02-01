@@ -391,7 +391,7 @@ class GameMenu:
             for button, text in zip(self.characteristics_upgrades_buttons,
                                     turrets_list[self.turret_id].get_costs_of_upgrades()):
                 if text[2] == 10:
-                    button.text = 'MAX'
+                    button.text = '\nMAX'
                     button.background_color = pygame.Color(255, 0, 0)
                     button.set_style(red_btn)
                     button.set_clicked_style(red_clicked_btn)
