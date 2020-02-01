@@ -1,7 +1,9 @@
+from copy import deepcopy
+
 import pygame
 from pygame import transform, draw, Color, image
 from pygame.locals import *
-import math
+
 from gui import draw_better_line, MapCreatorMenu
 from other import Vector, distance, near_point_on_vector
 
@@ -99,6 +101,7 @@ class MapCreator:
     mouse_button_pressed = False
 
     def __init__(self):
+        self.changes_stack = list()
         self.dot_id = 0
         self.base_size = None
         self.filename = None
@@ -110,17 +113,14 @@ class MapCreator:
         self.current_pos = (-1, -1)
 
     def load(self, name):
-        try:
-            file = open('levels/' + name + '.txt', 'r').readlines()
-            self.base = self.Base(*tuple(map(int, file[0].split()))[:-2], True)
-            file = tuple(map(lambda x: tuple(map(int, x.split())), file[1:-1]))
-            self.dots = {i: self.Dot(*dot) for i, dot in enumerate(file)}
-            self.dot_id = len(file)
-        except ImportError as err:
-            print(err)
-            self.dots = dict()
-        else:
-            print('success')
+        self.changes_stack.append((deepcopy(self.dots), deepcopy(self.base), deepcopy(self.dot_id)))
+        print(self.changes_stack)
+
+        file = open('levels/' + name + '.txt', 'r').readlines()
+        self.base = self.Base(*tuple(map(int, file[0].split()))[:-2], True)
+        file = tuple(map(lambda x: tuple(map(int, x.split())), file[1:-1]))
+        self.dots = {i: self.Dot(*dot) for i, dot in enumerate(file)}
+        self.dot_id = len(file)
 
     def save(self, name):
         try:
@@ -167,13 +167,16 @@ class MapCreator:
         screen.blit(surf, (0, 0))
 
     def set_point(self, pos):
+        self.changes_stack.append((deepcopy(self.dots), deepcopy(self.base), deepcopy(self.dot_id)))
         self.dots[self.dot_id] = self.Dot(*pos)
         self.dot_id += 1
 
     def set_base(self, pos):
+        self.changes_stack.append((deepcopy(self.dots), deepcopy(self.base), deepcopy(self.dot_id)))
         self.base = self.Base(*pos)
 
     def align_to_grid(self):
+        self.changes_stack.append((deepcopy(self.dots), deepcopy(self.base), deepcopy(self.dot_id)))
         if self.base is not None:
             self.base.x = round(self.base.x / 20) * 20
             self.base.y = round(self.base.y / 20) * 20
@@ -202,13 +205,20 @@ class MapCreator:
             return True
         return False
 
+    def roll_back_changes(self):
+        if len(self.changes_stack) >= 1:
+            self.dots, self.base, self.dot_id = self.changes_stack[-1]
+            del self.changes_stack[-1]
+            print('rolled back success')
+
     def start(self, screen):
         out_state = 0
         self.menu = MapCreatorMenu()
         want_to_place_type = None
         want_to_place_flag = False
-        state = None
+
         while out_state == 0 or out_state is None:
+            state = None
             for event in pygame.event.get():
                 state = self.menu.event_handler(event) if event.type in (MOUSEBUTTONUP,
                                                                          MOUSEBUTTONDOWN,
@@ -218,6 +228,9 @@ class MapCreator:
                 if event.type == KEYDOWN:
                     if event.key == K_F4 and event.mod in (512, 256):
                         return 8, screen
+                    if event.key == pygame.K_z and event.mod in [128, 64]:
+                        self.roll_back_changes()
+
                     if event.key == K_ESCAPE:
                         return 0, screen
                     if event.key == K_BACKSPACE and self.focus_on != -1:
@@ -266,6 +279,8 @@ class MapCreator:
                             if want_to_place_type == 'base':
                                 self.set_base(event.pos)
                         want_to_place_flag = False
+            # end event-loop
+
             if state == 1:
                 want_to_place_flag = True
                 want_to_place_type = 'point'
