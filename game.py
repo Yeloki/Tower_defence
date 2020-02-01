@@ -9,6 +9,33 @@ from other import Vector
 from other import distance, distance_to_vector
 from turrets import TOWERS, prototype, COSTS
 
+boom_map2 = pygame.transform.scale(pygame.image.load('images/base_explosion.png'), (1350, 900))
+
+
+class BaseExplosion(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__()
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+
+    def update(self, surface):
+        ln = len(self.frames)
+        self.cur_frame = (self.cur_frame + 1) % ln
+        self.image = self.frames[self.cur_frame]
+        surface.blit(self.image, self.rect)
+        return self.cur_frame == ln - 1
+
+
 hp_texture = pygame.image.load('images/cpu.png')
 base_texture = pygame.transform.scale(pygame.image.load('images/base.jpg'), (150, 100))
 boom_map = pygame.transform.scale(pygame.image.load('images/boom.png'), (240, 240))
@@ -233,7 +260,7 @@ class Game:
 
         # id for time-depends events
         second = 30
-
+        expl = None
         clock = pygame.time.Clock()
         pygame.time.set_timer(second, 1000)
         self.menu = GameMenu()
@@ -247,33 +274,31 @@ class Game:
 
                 if event.type == QUIT:
                     return 8, screen
-
-                if event.type == second:  # next wave event
-                    pygame.time.set_timer(second, 1000)
-                    self.time -= 1
-                    if self.time == 0:
-                        self.next_wave_sender()
-                        self.time = 20
-                    print('second passed')
+                if expl is None:
+                    if event.type == second:  # next wave event
+                        pygame.time.set_timer(second, 1000)
+                        self.time -= 1
+                        if self.time == 0:
+                            self.next_wave_sender()
+                            self.time = 20
+                        print('second passed')
 
                 if event.type == KEYDOWN:  # hot-keys
-                    if event.key == K_p:
-                        self.pause_flag = True
                     if event.key == K_c:  # cheat button (add money)
                         self.money += 10000
                     if event.key == K_F4 and event.mod in (512, 256):
                         return 8, screen
                     if event.key == K_ESCAPE:
                         return 0, screen
-
-                    if event.key == K_SPACE:
-                        self.next_wave_sender()
-                        self.time = 20
-                        pygame.time.set_timer(second, 1000)
-                    if event.key == K_s and self.focus_on is not None:
-                        self.money += self.all_turrets[self.focus_on].sell()
-                        del self.all_turrets[self.focus_on]
-                        self.focus_on = None
+                    if expl is None:
+                        if event.key == K_SPACE:
+                            self.next_wave_sender()
+                            self.time = 20
+                            pygame.time.set_timer(second, 1000)
+                        if event.key == K_s and self.focus_on is not None:
+                            self.money += self.all_turrets[self.focus_on].sell()
+                            del self.all_turrets[self.focus_on]
+                            self.focus_on = None
 
                 if event.type == MOUSEMOTION:
                     self.current_pos = event.pos
@@ -309,30 +334,29 @@ class Game:
                         want_to_build_flag = False
                         want_to_build_type = None
             # event handler cycle end
+            if expl is None:
+                wave_timers = tuple(self.wave_queue.items())
+                for key, val in wave_timers:
+                    if global_time() - val[0] >= 1:
+                        self.enemies_sender(key)
+                self.move_enemies()
+                self.detected_enemy()
 
-            wave_timers = tuple(self.wave_queue.items())
-            for key, val in wave_timers:
-                if global_time() - val[0] >= 1:
-                    self.enemies_sender(key)
-
-            self.move_enemies()
-            self.detected_enemy()
-
-            # handling state that returns a menu
-            if state == 1:
-                pygame.time.set_timer(second, 1000)
-                self.time = 20
-                self.next_wave_sender()
-            if state == 2:
-                print('built')
-                want_to_build_flag = True
-                want_to_build_type = 'InfernoTower'
-            if state == 3:
-                print('built')
-                want_to_build_flag = True
-                want_to_build_type = 'LaserTower'
-            if state in (5, 6, 7, 8, 9):  # reserved for upgrades
-                self.turret_upgrade(state - 5)
+                # handling state that returns a menu
+                if state == 1:
+                    pygame.time.set_timer(second, 1000)
+                    self.time = 20
+                    self.next_wave_sender()
+                if state == 2:
+                    print('built')
+                    want_to_build_flag = True
+                    want_to_build_type = 'InfernoTower'
+                if state == 3:
+                    print('built')
+                    want_to_build_flag = True
+                    want_to_build_type = 'LaserTower'
+                if state in (5, 6, 7, 8, 9):  # reserved for upgrades
+                    self.turret_upgrade(state - 5)
 
             self.game_map.update(screen, self.base_hp)
             self.update_enemies(screen)
@@ -355,8 +379,13 @@ class Game:
                                          TOWERS[want_to_build_type].radius_size,
                                          want_to_build_type,
                                          screen))
-            if self.base_hp <= 0:
-                return 9, screen
+            if self.base_hp <= 0 and expl is None:
+                expl = BaseExplosion(boom_map2, 9, 9, self.game_map.base.x, self.game_map.base.y)
+            if expl is not None:
+                print(expl.cur_frame)
+                if expl.update(screen):
+                    return 9, screen
+
             # fps wait and flip the display
             clock.tick(self.fps)
             pygame.display.flip()
