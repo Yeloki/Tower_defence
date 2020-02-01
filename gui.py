@@ -6,6 +6,7 @@ from turrets import TOWERS, COSTS
 
 used_font = 'bahnschrift'
 # used_font = 'calibri'
+# used_font = 'consolas'
 pygame.init()
 NUMS = dict()
 size = 18

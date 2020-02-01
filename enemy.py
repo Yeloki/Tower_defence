@@ -59,15 +59,16 @@ class Enemy:
     def update(self, screen) -> int:
         if self.abs_r_size is None:
             self.resize(screen)
-        if self.hp <= 0:
+        text = int((self.hp / self.max_hp) * 100)
+        if self.hp <= 0 or text == 0:
             return STATUSES['ENEMY_STATUS_DIED']
 
-        text = int((self.hp / self.max_hp) * 100)
         lb = PixelLabel(int(self.x), int(self.y - self.abs_r_size * 1.5))
         lb.fix = 2
         lb.text = text
-        screen.blit(enemy[self.wave % 4][self.angle],
-                    (int(self.x) - 20 + randint(-1, 1), int(self.y) - 20 + randint(-1, 1)))
+        enemy_type = 3 if self.burn_flag else 2 if self.freeze_flag else 0
+        screen.blit(enemy[enemy_type][self.angle],
+                    (int(self.x - 20 + randint(-1, 1) / 2), int(self.y - 20 + randint(-1, 1) / 2)))
         lb.update(screen)
         return STATUSES[self.current_status]
 
@@ -124,9 +125,9 @@ class Enemy:
                     ((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) <= 0 < (
                             self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0])):
                 k = -180
-            self.angle = (90 + int(degrees(atan(tan))) + randint(-5, 5) + k) % 360
+            self.angle = (90 + int(degrees(atan(tan))) + randint(-2, 2) + k) % 360
         except ZeroDivisionError:
-            self.angle = randint(-5, 5) % 360
+            self.angle = randint(-2, 2) % 360
 
     def pos(self):
         return self.x, self.y

@@ -21,7 +21,7 @@ screen_width = 1024
 screen_height = 720
 minimal_screen_width = 320
 minimal_screen_height = 240
-screen = pygame.display.set_mode((screen_width, screen_height), flags=RESIZABLE | DOUBLEBUF | HWSURFACE)
+screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
 
 
@@ -66,10 +66,10 @@ def menu() -> int:
     medium_game.text = 'Medium mode'
     hard_game.text = 'Hard mode'
     map_creator.text = 'Map creator'
-    user_leves.text = 'User leves'
+    user_leves.text = "User's level"
     settings.text = 'Settings'
     exit_btn.text = 'Exit'
-    name.text = 'Onslaught'
+    name.text = 'TowerDefence'
 
     easy_game.handler = 1
     medium_game.handler = 2
@@ -96,7 +96,7 @@ def menu() -> int:
         for event in pygame.event.get():
             if event.type == VIDEORESIZE:
                 screen_width, screen_height = event.size
-                screen = pygame.display.set_mode((screen_width, screen_height), flags=DOUBLEBUF | HWSURFACE)
+                screen = pygame.display.set_mode((screen_width, screen_height))
                 objects_resize(objects, screen)
             if event.type == QUIT:
                 return 8
@@ -130,15 +130,13 @@ while running:
         game_state = menu()
     if game_state in (1, 2, 3, 4):  # New game
         game = Game(game_state, 'levels/common.txt')
-        game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
-        del game
+        game_state, screen = game.start(pygame.display.set_mode((1024, 720)))
     if game_state == 5:  # Map creator
         mp = MapCreator()
-        game_state, screen = mp.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
+        game_state, screen = mp.start(pygame.display.set_mode((1024, 720)))
     if game_state == 6:  # challenges
         game = Game(1, 'levels/user_level.txt')
-        game_state, screen = game.start(pygame.display.set_mode((1024, 720), flags=DOUBLEBUF | HWSURFACE))
-        del game
+        game_state, screen = game.start(pygame.display.set_mode((1024, 720)))
     if game_state == 7:  # settings
         pass
     if game_state == 8:  # for exit

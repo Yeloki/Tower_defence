@@ -29,22 +29,30 @@ del image
 
 class InfernoTower:
     radius_size = 20
-    # damage
-    damage = 120
-
-    damage_update_cost = 20
-    damage_update_value = 60
-    i = 1  # count of updates (damage)
-    max_upgrade_damage_count = 10
-
-    # range
     range_of_attack = 200
-    j = 1  # count of updates (range)
-    range_update_cost = 10
-    range_update_value = 25
-    max_upgrade_range_count = 10
 
     def __init__(self, x, y) -> None:
+        # damage
+        self.damage = 120
+
+        self.damage_update_cost = 20
+        self.number_of_damage_improvements = 1  # count of updates (damage)
+        self.damage_update_value = 60
+        self.max_upgrade_damage_count = 10
+
+        # range
+        self.number_of_improvements_of_range_of_attack = 1  # count of updates (range)
+        self.range_update_cost = 10
+        self.range_update_value = 25
+        self.max_upgrade_range_count = 10
+        # burn
+        self.burning_time = 3
+        self.burning_update_cost = 20
+        self.number_of_burning_improvements = 1  # count of updates (damage)
+        self.burning_update_value = 1
+        self.max_upgrade_burning_count = 10
+
+        self.summary_tower_cost = COSTS['InfernoTower']
         self.x = x
         self.y = y
         self.triggered = False
@@ -58,17 +66,17 @@ class InfernoTower:
                   (Color(50, 50, 255), Color(0, 242, 255)),
                   (Color(50, 255, 50), Color(100, 242, 0)),
                   (Color(255, 50, 50), Color(246, 242, 0)))
-        if 1 <= self.i + self.j <= 5:
+        if 1 <= self.number_of_damage_improvements + self.number_of_improvements_of_range_of_attack <= 5:
             surface.blit(inferno1, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
             screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
             color_key = 0
 
-        elif 6 <= self.i + self.j <= 12:
+        elif 6 <= self.number_of_damage_improvements + self.number_of_improvements_of_range_of_attack <= 12:
             surface.blit(inferno2, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
             screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
             color_key = 1
 
-        elif 13 <= self.i + self.j <= 19:
+        elif 13 <= self.number_of_damage_improvements + self.number_of_improvements_of_range_of_attack <= 19:
             surface.blit(inferno3, (self.range_of_attack - self.radius_size, self.range_of_attack - self.radius_size))
             screen.blit(surface, (self.x - self.range_of_attack, self.y - self.range_of_attack))
             color_key = 2
@@ -85,14 +93,25 @@ class InfernoTower:
     #     return ''
 
     def upgrade(self, type_of_characteristics):
-        if type_of_characteristics == 0 and self.i != self.max_upgrade_damage_count:
-            self.damage += self.damage_update_value
-            self.damage_update_cost += 20 * self.i
-            self.i += 1
-        if type_of_characteristics == 1 and self.j != self.max_upgrade_range_count:
-            self.range_of_attack += self.range_update_value
-            self.range_update_cost += 20 * self.j
-            self.j += 1
+        if type_of_characteristics == 0:
+            if self.number_of_damage_improvements != self.max_upgrade_damage_count:
+                self.damage += self.damage_update_value
+                self.summary_tower_cost += self.damage_update_cost
+                self.damage_update_cost += 20 * self.number_of_damage_improvements
+                self.number_of_damage_improvements += 1
+
+        if type_of_characteristics == 1:
+            if self.number_of_improvements_of_range_of_attack != self.max_upgrade_range_count:
+                self.range_of_attack += self.range_update_value
+                self.summary_tower_cost += self.range_update_cost
+                self.range_update_cost += 20 * self.number_of_improvements_of_range_of_attack
+                self.number_of_improvements_of_range_of_attack += 1
+        if type_of_characteristics == 2:
+            if self.number_of_burning_improvements != self.max_upgrade_burning_count:
+                self.burning_time += self.burning_update_value
+                self.summary_tower_cost += self.burning_update_cost
+                self.burning_update_cost += 20 * self.number_of_burning_improvements
+                self.number_of_burning_improvements += 1
 
     def range(self):
         return self.range_of_attack
@@ -102,6 +121,9 @@ class InfernoTower:
 
     def pos(self):
         return self.x, self.y
+
+    def sell(self):
+        return self.summary_tower_cost // 2
 
     def set_target(self, enemy_id):
         self.target_id = enemy_id
@@ -116,21 +138,37 @@ class InfernoTower:
             self.target_id = -1
             return
         # enemies[self.target_id].get_damage(self.damage // 60)
-        enemies[self.target_id].burn(0.5, self.damage / 60)
+        enemies[self.target_id].burn(self.burning_time / 10, self.damage / 60)
 
     def get_characteristics(self):
-        out = [self.i, self.j]
-        return tuple(zip(('damage:\n' + str(self.damage), 'range:\n' + str(self.range_of_attack)), out))
+        out = [self.number_of_damage_improvements,
+               self.number_of_improvements_of_range_of_attack,
+               self.number_of_burning_improvements]
+        return tuple(zip(('damage:\n' + str(self.damage),
+                          'range:\n' + str(self.range_of_attack),
+                          'burning time:\n' + str(self.burning_time / 10)
+                          ), out))
 
     def get_costs_of_upgrades(self):
-        out = [self.damage_update_cost, self.range_update_cost]
-        out2 = [self.i, self.j]
-        return tuple(zip(('Upgrade damage\nCost:' + str(self.damage_update_cost), 'Upgrade range\nCost: ' + str(
-            self.range_update_cost)), out, out2))
+        out = [self.damage_update_cost,
+               self.range_update_cost,
+               self.burning_update_cost]
+        out2 = [self.number_of_damage_improvements,
+                self.number_of_improvements_of_range_of_attack,
+                self.number_of_burning_improvements]
+        return tuple(zip(('Upgrade damage\nCost:' + str(self.damage_update_cost),
+                          'Upgrade range\nCost: ' + str(self.range_update_cost),
+                          'Upgrade burning\ntime\nCost: ' + str(self.burning_update_cost)
+                          ), out, out2))
 
     def characteristics(self):
-        out = [self.i, self.j]
-        return tuple(zip((self.damage_update_cost, self.range_update_cost), out))
+        out = [self.number_of_damage_improvements,
+               self.number_of_improvements_of_range_of_attack,
+               self.number_of_burning_improvements]
+        return tuple(zip((self.damage_update_cost,
+                          self.range_update_cost,
+                          self.burning_update_cost
+                          ), out))
 
 
 def prototype(screen, pos: (int, int), r, turret_range, collision: bool):
@@ -142,28 +180,38 @@ def prototype(screen, pos: (int, int), r, turret_range, collision: bool):
 
 class LaserTower:
     radius_size = 20
-    # damage
-
-    damage = 60
-    damage_update_cost = 20
-    damage_update_value = 60
-    i = 1  # count of updates (damage)
-    max_upgrade_damage_count = 10
-
-    # range
     range_of_attack = 200
-    j = 1  # count of updates (range)
-    range_update_cost = 10
-    range_update_value = 25
-    max_upgrade_range_count = 10
-
-    rate = 1
-    h = 1  # count of updates (rate)
-    rate_update_cost = 10
-    rate_upgrade_value = 1
-    max_upgrade_rate_count = 10
 
     def __init__(self, x, y):
+        # damage
+
+        self.damage = 60
+        self.damage_update_cost = 20
+        self.damage_update_value = 60
+        self.number_of_damage_improvements = 1  # count of updates (damage)
+        self.max_upgrade_damage_count = 10
+
+        # range
+        self.number_of_improvements_of_range_of_attack = 1  # count of updates (range)
+        self.range_update_cost = 10
+        self.range_update_value = 25
+        self.max_upgrade_range_count = 10
+
+        # rate
+        self.rate = 12
+        self.number_of_improvements_of_rate = 1  # count of updates (rate)
+        self.rate_update_cost = 10
+        self.rate_upgrade_value = 4
+        self.max_upgrade_rate_count = 10
+
+        # freeze
+        self.freezing_time = 3
+        self.freezing_update_cost = 20
+        self.number_of_freezing_improvements = 1  # count of updates (damage)
+        self.freezing_update_value = 1
+        self.max_upgrade_freezing_count = 10
+
+        self.summary_tower_cost = COSTS['LaserTower']
         self.shoot_flag = False
         self.last_shoot_time = time()
         self.angle = 0
@@ -187,18 +235,34 @@ class LaserTower:
         self.triggered = True
 
     def upgrade(self, type_of_characteristics):
-        if type_of_characteristics == 0 and self.i != self.max_upgrade_damage_count:
-            self.damage += self.damage_update_value
-            self.damage_update_cost += 20 * self.i
-            self.i += 1
-        if type_of_characteristics == 1 and self.j != self.max_upgrade_range_count:
-            self.range_of_attack += self.range_update_value
-            self.range_update_cost += 20 * self.j
-            self.j += 1
-        if type_of_characteristics == 2 and self.h != self.max_upgrade_rate_count:
-            self.rate += self.rate_upgrade_value
-            self.rate_update_cost += 20 * self.h
-            self.h += 1
+
+        if type_of_characteristics == 0:
+            if self.number_of_damage_improvements != self.max_upgrade_damage_count:
+                self.damage += self.damage_update_value
+                self.summary_tower_cost += self.damage_update_cost
+                self.damage_update_cost += 20 * self.number_of_damage_improvements
+                self.number_of_damage_improvements += 1
+
+        if type_of_characteristics == 1:
+            if self.number_of_improvements_of_range_of_attack != self.max_upgrade_range_count:
+                self.range_of_attack += self.range_update_value
+                self.summary_tower_cost += self.range_update_cost
+                self.range_update_cost += 20 * self.number_of_improvements_of_range_of_attack
+                self.number_of_improvements_of_range_of_attack += 1
+
+        if type_of_characteristics == 2:
+            if self.number_of_improvements_of_rate != self.max_upgrade_rate_count:
+                self.rate += self.rate_upgrade_value
+                self.summary_tower_cost += self.rate_update_cost
+                self.rate_update_cost += 20 * self.number_of_improvements_of_rate
+                self.number_of_improvements_of_rate += 1
+
+        if type_of_characteristics == 3:
+            if self.number_of_freezing_improvements != self.max_upgrade_freezing_count:
+                self.freezing_time += self.freezing_update_value
+                self.summary_tower_cost += self.freezing_update_cost
+                self.freezing_update_cost += 20 * self.number_of_freezing_improvements
+                self.number_of_freezing_improvements += 1
 
     def shoot(self, enemies):
         if self.target_id == -1 or self.target_id not in enemies:
@@ -206,36 +270,56 @@ class LaserTower:
         if distance(enemies[self.target_id].pos(), self.pos()) >= self.range_of_attack:
             self.target_id = -1
             return
-        if time() - self.last_shoot_time >= 1 / self.rate:
+        if time() - self.last_shoot_time >= 10 / self.rate:
             self.last_shoot_time = time()
             self.shoot_flag = True
             enemies[self.target_id].get_damage(self.damage)
-            enemies[self.target_id].freeze(0.3)
+            enemies[self.target_id].freeze(self.freezing_time / 10)
 
     def get_characteristics(self):
-        out = [self.i, self.j, self.h]
+        out = [self.number_of_damage_improvements,
+               self.number_of_improvements_of_range_of_attack,
+               self.number_of_improvements_of_rate,
+               self.number_of_freezing_improvements]
+
         return tuple(zip(('damage:\n' + str(self.damage),
                           'range:\n' + str(self.range_of_attack),
-                          'rate:\n' + str(self.rate)
+                          'rate:\n' + str(self.rate / 10),
+                          'freezing time:\n' + str(self.freezing_time / 10)
                           ), out))
 
     def get_costs_of_upgrades(self):
-        out = [self.damage_update_cost, self.range_update_cost, self.rate_update_cost]
-        out2 = [self.i, self.j, self.h]
+        out = [self.damage_update_cost,
+               self.range_update_cost,
+               self.rate_update_cost,
+               self.freezing_update_cost]
+        out2 = [self.number_of_damage_improvements,
+                self.number_of_improvements_of_range_of_attack,
+                self.number_of_improvements_of_rate,
+                self.number_of_freezing_improvements]
+
         return tuple(zip(('Upgrade damage\nCost:' + str(self.damage_update_cost),
                           'Upgrade range\nCost: ' + str(self.range_update_cost),
-                          'Upgrade rate\nCost: ' + str(self.rate_update_cost)
+                          'Upgrade rate\nCost: ' + str(self.rate_update_cost),
+                          'Upgrade freezing\ntime\nCost: ' + str(self.freezing_update_cost)
                           ), out, out2))
 
     def characteristics(self):
-        out = [self.i, self.j, self.h]
+        out = [self.number_of_damage_improvements,
+               self.number_of_improvements_of_range_of_attack,
+               self.number_of_improvements_of_rate,
+               self.number_of_freezing_improvements]
+
         return tuple(zip((self.damage_update_cost,
                           self.range_update_cost,
-                          self.rate_update_cost
+                          self.rate_update_cost,
+                          self.freezing_update_cost
                           ), out))
 
     # def description(self):
     #     return ''
+    def sell(self):
+        return self.summary_tower_cost // 2
 
     def update(self, screen, enemies) -> (None, (Vector, Color)):
         surface = Surface((self.range_of_attack * 2, self.range_of_attack * 2), SRCALPHA)

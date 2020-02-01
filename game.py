@@ -9,6 +9,9 @@ from other import Vector
 from other import distance, distance_to_vector
 from turrets import TOWERS, prototype, COSTS
 
+hp_texture = pygame.image.load('images/cpu.png')
+base_texture = pygame.transform.scale(pygame.image.load('images/base.jpg'), (150, 100))
+boom_map = pygame.transform.scale(pygame.image.load('images/boom.png'), (240, 240))
 STATUSES = dict()
 buffer = open('CONSTS', 'r')
 for key, val in map(lambda x: (x.split()[0], int(x.split()[1])), buffer.readlines()):
@@ -18,18 +21,35 @@ del buffer, key, val
 
 
 class GameMap:
-    COSTS = {'InfernoTower': 20}
+    class Base:
+        triggered = False
+        x, y = 0, 0
+
+        def __init__(self, x, y):
+            self.x, self.y = x, y
+
+        def update(self, screen, hp):
+            surf = pygame.Surface((150, 100), SRCALPHA)
+            if base_texture is not None:
+                surf.blit(base_texture, (0, 0))
+            else:
+                pygame.draw.rect(surf, pygame.Color(255, 255, 255), pygame.Rect(0, 0, 150, 100))
+            for i in range(hp):
+                if i < 5:
+                    surf.blit(hp_texture, (15 + 24 * i, 21))
+                else:
+                    surf.blit(hp_texture, (15 + 24 * (i - 5), 55))
+            screen.blit(surf, (self.x, self.y))
+
     x_size = 0
     y_size = 0
     line_width = 25
     game_map = list()
-    base = None
-    base_size = None
     background = pygame.image.load('images/game_background.jpg')
 
     def __init__(self, path_to_map):
         file = open(path_to_map, 'r').readlines()
-        self.base_size = tuple(map(int, file[0].split()))
+        self.base = self.Base(*tuple(map(int, file[0].split()))[:2])
         file = tuple(map(lambda x: tuple(map(int, x.split())), file[1:]))
         self.dots = [i for i in file]
         self.game_map = [Vector(*file[i], *file[i + 1]) for i in range(len(file) - 1)]
@@ -45,31 +65,49 @@ class GameMap:
             draw_better_line(screen, vec.begin(), vec.end(), pygame.Color(0, 62, 141), self.line_width)
         for dot in self.dots:
             pygame.draw.circle(screen, pygame.Color(0, 62, 141), dot, self.line_width)
-        if self.base is not None:
-            screen.blit(pygame.transform.scale(self.base, self.base_size[:2]), (self.base_size[2:]))
-        else:
-            pygame.draw.rect(screen, pygame.Color(255, 255, 255), pygame.Rect(*self.base_size))
-            font = pygame.font.SysFont('Comic Sans MS', 32)
-            text = font.render(str(base_hp), 1, pygame.Color(0, 100, 0))
-            text_h = text.get_height()
-            screen.blit(text, (self.base_size[0] + 5, self.base_size[1] + text_h))
+        self.base.update(screen, base_hp)
 
 
 class Game:
+    class Explosion(pygame.sprite.Sprite):
+        def __init__(self, sheet, columns, rows, x, y):
+            super().__init__()
+            self.frames = []
+            self.cut_sheet(sheet, columns, rows)
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+            self.rect = self.rect.move(x - 20, y - 20)
+
+        def cut_sheet(self, sheet, columns, rows):
+            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
+            for j in range(rows):
+                for i in range(columns):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+                    self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+
+        def update(self, surface):
+            ln = len(self.frames)
+            self.cur_frame = (self.cur_frame + 1) % ln
+            self.image = self.frames[self.cur_frame]
+            surface.blit(self.image, self.rect)
+            return self.cur_frame == ln - 1
 
     def __init__(self, difficult, path_to_map) -> None:
+        self.fps = 60
         self.money = 30
         self.mouse_button_pressed = False
         self.focus_on = None
         self.time = 20
 
+        self.all_animations_key = 0
+
         self.enemy_id = 0
         self.turrets_id = 0
         self.wave_size = 10
         self.current_pos = (0, 0)
-        self.fps = 60
         self.wave_queue = dict()
         self.all_turrets = dict()
+        self.all_animations = dict()
         self.all_enemies_on_map = dict()
 
         self.current_wave = 0
@@ -82,6 +120,18 @@ class Game:
         self.difficult = difficult
         self.base_hp = 12 - difficult * 2
         self.game_map = GameMap(path_to_map)
+
+    def update_animation(self, screen):
+        for_del = []
+        for key, val in self.all_animations.items():
+            if val.update(screen):
+                for_del.append(key)
+        for key in for_del:
+            del self.all_animations[key]
+
+    def add_explosion(self, pos):
+        self.all_animations[self.all_animations_key] = self.Explosion(boom_map, 6, 6, *pos)
+        self.all_animations_key = (self.all_animations_key + 1) % 100000
 
     def detected_enemy(self):
         a = distance
@@ -104,6 +154,7 @@ class Game:
                 self.money += self.all_enemies_on_map[enemy_id].wave
                 self.kills += 1
                 delete.append(enemy_id)
+                self.add_explosion(enemy.pos())
                 continue
             if status == STATUSES['ENEMY_STATUS_TO_GET_TO_BASE']:
                 delete.append(enemy_id)
@@ -148,15 +199,14 @@ class Game:
             if distance_to_vector(pos, vec) - self.game_map.line_width <= r:
                 print(min(test))
                 return True
-        print(min(test))
         x, y = pos
         if x + r in range(self.menu.rect[0], self.menu.rect[2] + self.menu.rect[0] + 1) and \
                 y + r in range(self.menu.rect[1], self.menu.rect[3] + self.menu.rect[1] + 1):
             return True
         if x not in range(r, screen_width - r + 1) or y not in range(r, screen_height - r + 1):
             return True
-        if x + r in range(self.game_map.base_size[0], self.game_map.base_size[0] + self.game_map.base_size[2]) and \
-                y + r in range(self.game_map.base_size[1], self.game_map.base_size[1] + self.game_map.base_size[3]):
+        if x + r in range(self.game_map.base.x, self.game_map.base.x + 150) and \
+                y + r in range(self.game_map.base.y, self.game_map.base.y + 100):
             return True
         for _, turret in self.all_turrets.items():
             if distance(pos, (turret.x, turret.y)) <= r * 2:
@@ -220,6 +270,10 @@ class Game:
                         self.next_wave_sender()
                         self.time = 20
                         pygame.time.set_timer(second, 1000)
+                    if event.key == K_s and self.focus_on is not None:
+                        self.money += self.all_turrets[self.focus_on].sell()
+                        del self.all_turrets[self.focus_on]
+                        self.focus_on = None
 
                 if event.type == MOUSEMOTION:
                     self.current_pos = event.pos
@@ -283,6 +337,7 @@ class Game:
             self.game_map.update(screen, self.base_hp)
             self.update_enemies(screen)
             self.update_turrets(screen)
+            self.update_animation(screen)
             self.menu.update(screen,
                              self.time,
                              self.money,
