@@ -3,7 +3,6 @@ from os import environ
 from pygame import Color
 from pygame.locals import *
 
-from consts import blue_btn, blue_clicked_btn
 from game import Game
 from gui import *
 from map_creator import MapCreator
@@ -12,7 +11,6 @@ from map_creator import MapCreator
 
 environ['SDL_VIDEO_CENTERED'] = '1'
 pygame.init()
-
 game_state = 0
 running = True
 

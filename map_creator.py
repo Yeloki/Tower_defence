@@ -1,7 +1,7 @@
 import pygame
 from pygame import transform, draw, Color, image
 from pygame.locals import *
-
+import math
 from gui import draw_better_line, MapCreatorMenu
 from other import Vector, distance, near_point_on_vector
 
@@ -166,15 +166,20 @@ class MapCreator:
             self.base.update(surf)
         screen.blit(surf, (0, 0))
 
-    def get_levels(self):
-        pass
-
     def set_point(self, pos):
         self.dots[self.dot_id] = self.Dot(*pos)
         self.dot_id += 1
 
     def set_base(self, pos):
         self.base = self.Base(*pos)
+
+    def align_to_grid(self):
+        if self.base is not None:
+            self.base.x = round(self.base.x / 20) * 20
+            self.base.y = round(self.base.y / 20) * 20
+        for point_id, point in self.dots.items():
+            point.x = round(point.x / 20) * 20
+            point.y = round(point.y / 20) * 20
 
     def collision(self, pos, screen) -> bool:
         screen_width = screen.get_width()
@@ -271,6 +276,11 @@ class MapCreator:
                 self.save('user_level')
             if state == 4:
                 self.load('user_level')
+            if state == 5:
+                self.align_to_grid()
+            if state == 6:
+                self.dots.clear()
+                self.base = None
             self.update_map(screen)
             self.menu.update(screen, (self.base is not None))
             if want_to_place_flag:

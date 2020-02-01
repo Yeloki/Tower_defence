@@ -4,7 +4,7 @@ from time import time
 import pygame
 
 from consts import used_font, NUMS, green_btn, green_clicked_btn, \
-    red_btn, red_clicked_btn, yellow_btn, yellow_clicked_btn, blue_clicked_btn, blue_btn
+    red_btn, red_clicked_btn, blue_clicked_btn, blue_btn
 from turrets import TOWERS, COSTS
 
 
@@ -425,7 +425,6 @@ class MapCreatorMenu:
         self.is_base_built = False
         self.new_point = PushButton(0, 0, 10, 50)
         self.new_point.text = 'new\npoint'
-        self.new_point.background_color, self.new_point.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.new_point.handler = 1
         self.new_point.style = blue_btn
         self.new_point.clicked_style = blue_clicked_btn
@@ -433,7 +432,6 @@ class MapCreatorMenu:
 
         self.set_base = PushButton(0, 50, 10, 50)
         self.set_base.text = 'set\nbase'
-        self.set_base.background_color, self.set_base.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.set_base.handler = 2
         self.set_base.style = blue_btn
         self.set_base.clicked_style = blue_clicked_btn
@@ -441,7 +439,6 @@ class MapCreatorMenu:
 
         self.save_map = PushButton(10, 0, 10, 50)
         self.save_map.text = 'save\nmap'
-        self.save_map.background_color, self.save_map.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.save_map.handler = 3
         self.save_map.style = blue_btn
         self.save_map.clicked_style = blue_clicked_btn
@@ -449,11 +446,24 @@ class MapCreatorMenu:
 
         self.load_map = PushButton(10, 50, 10, 50)
         self.load_map.text = 'load\nmap'
-        self.load_map.background_color, self.load_map.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.load_map.handler = 4
         self.load_map.style = blue_btn
         self.load_map.clicked_style = blue_clicked_btn
         self.load_map.alpha = 200
+
+        self.align_to_grid = PushButton(20, 50, 10, 50)
+        self.align_to_grid.text = 'Align\nto Grid'
+        self.align_to_grid.handler = 5
+        self.align_to_grid.style = blue_btn
+        self.align_to_grid.clicked_style = blue_clicked_btn
+        self.align_to_grid.alpha = 200
+
+        self.clear_map = PushButton(20, 0, 10, 50)
+        self.clear_map.text = 'Clear\nmap'
+        self.clear_map.handler = 6
+        self.clear_map.style = blue_btn
+        self.clear_map.clicked_style = blue_clicked_btn
+        self.clear_map.alpha = 200
 
     def resize(self, screen) -> None:
         screen_height, screen_width = screen.get_height(), screen.get_width()
@@ -470,10 +480,20 @@ class MapCreatorMenu:
             return
         else:
             if not self.is_base_built:
-                a = emit_event_to_objects((self.set_base, self.new_point, self.save_map, self.load_map), event,
-                                          *self.rect[:2])
+                a = emit_event_to_objects((self.set_base,
+                                           self.new_point,
+                                           self.save_map,
+                                           self.load_map,
+                                           self.align_to_grid,
+                                           self.clear_map),
+                                          event, *self.rect[:2])
             else:
-                a = emit_event_to_objects((self.new_point, self.save_map, self.load_map), event, *self.rect[:2])
+                a = emit_event_to_objects((self.new_point,
+                                           self.save_map,
+                                           self.load_map,
+                                           self.align_to_grid,
+                                           self.clear_map),
+                                          event, *self.rect[:2])
         return a
 
     def update(self, screen, is_base_built):
@@ -487,4 +507,6 @@ class MapCreatorMenu:
             self.set_base.update(menu)
         self.save_map.update(menu)
         self.load_map.update(menu)
+        self.align_to_grid.update(menu)
+        self.clear_map.update(menu)
         screen.blit(menu, (self.rect[0], self.rect[1]))
