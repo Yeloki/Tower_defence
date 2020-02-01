@@ -1,19 +1,11 @@
 import math
+from time import time
 
 import pygame
 
+from consts import used_font, NUMS, green_btn, green_clicked_btn, \
+    red_btn, red_clicked_btn, yellow_btn, yellow_clicked_btn, blue_clicked_btn, blue_btn
 from turrets import TOWERS, COSTS
-
-used_font = 'bahnschrift'
-# used_font = 'calibri'
-# used_font = 'consolas'
-pygame.init()
-NUMS = dict()
-size = 18
-font = pygame.font.SysFont(used_font, size)
-for i in range(101):
-    NUMS[i] = font.render(str(i), 1, pygame.Color(255, 255, 255))
-del font, i, size
 
 
 def updater(obj_list, screen):
@@ -23,7 +15,7 @@ def updater(obj_list, screen):
 
 def objects_resize(list_of_objects, screen):
     for obj in list_of_objects:
-        obj.resize(screen)
+        obj.set_rect(screen)
 
 
 def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None):
@@ -88,7 +80,7 @@ class PercentLabel:
         max_height = 0
         max_width = 0
         best = 1
-        for size in range(1, 1000):
+        for size in range(1, 100):
             font = pygame.font.SysFont(used_font, size)
             for i, elem in enumerate(lines):
                 text = font.render(str(elem), 1, self.text_color)
@@ -101,7 +93,7 @@ class PercentLabel:
                 return
             best = size
 
-    def resize(self, screen):
+    def set_rect(self, screen):
         screen_height, screen_width = screen.get_height(), screen.get_width()
         self.rect = (int(screen_width * self.x / 100),
                      int(screen_height * self.y / 100),
@@ -113,7 +105,7 @@ class PercentLabel:
 
     def update(self, screen):
         if self.rect is None or self.font_size is None:
-            self.resize(screen)
+            self.set_rect(screen)
         lines = self.text.split('\n')
         font = pygame.font.SysFont(used_font, self.font_size)
         for i, line in enumerate(lines):
@@ -130,23 +122,24 @@ class PercentLabel:
 
 class PushButton:
     # Params of this class
-    x: int = 0
-    y: int = 0
-    size_x: int = 0
-    size_y: int = 0
-    rect = None
-    text_color: pygame.Color = pygame.Color(0, 0, 0)
-    background_color: pygame.Color = pygame.Color(255, 255, 255)
-    alpha: int = 200
-    text: str = ''
-    flag: bool = False
-    font_size = None
-    fix: int = 0.1
-    handler: None
-    # flags of this class:
-    triggered: bool = False
 
     def __init__(self, x: 'x in percent', y, size_x, size_y):
+        self.text_color: pygame.Color = pygame.Color(0, 0, 0)
+        self.background_color: pygame.Color = pygame.Color(255, 255, 255)
+        self.text: str = ''
+        self.fix = 0.1
+        self.alpha: int = 200
+        self.rect = None
+        self.style = None
+        self.handler = None
+        self.font_size = None
+        # flags of this class:
+        self.flag: bool = False
+        self.triggered: bool = False
+
+        self.last_clicked_time = 0
+        self.clicked = False
+        self.clicked_style = None
         self.x, self.y, self.size_x, self.size_y = x, y, size_x, size_y
 
     def event_handler(self, event, fix_x=0, fix_y=0):
@@ -157,8 +150,10 @@ class PushButton:
                 self.triggered = False
         if event.type == pygame.MOUSEBUTTONUP and self.flag:
             self.flag = False
-            print(1)
+            # print(1)
             if self.collide(event.pos, fix_x, fix_y):
+                self.last_clicked_time = time()
+                self.clicked = True
                 return self.handler
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.flag = True
@@ -166,6 +161,19 @@ class PushButton:
     def collide(self, mouse_pos, fix_x=0, fix_y=0):
         return mouse_pos[0] in range(self.rect[0] + fix_x, self.rect[2] + self.rect[0] + fix_x) and \
                mouse_pos[1] in range(self.rect[1] + fix_y, self.rect[3] + self.rect[1] + fix_y)
+
+    def set_style(self, image):
+        if self.rect is not None:
+            self.style = pygame.transform.scale(image, self.rect[2:-1])
+        else:
+            self.style = image
+
+    def set_clicked_style(self, image):
+        self.clicked_style = image
+        if self.rect is not None:
+            self.clicked_style = pygame.transform.scale(image, self.rect[2:-1])
+        else:
+            self.style = image
 
     def __text_resize(self, button_size, fix):
         lines = self.text.split('\n')
@@ -185,7 +193,7 @@ class PushButton:
                 return
             best = size
 
-    def resize(self, screen):
+    def set_rect(self, screen):
         screen_height, screen_width = screen.get_height(), screen.get_width()
         self.rect = (int(screen_width * self.x / 100),
                      int(screen_height * self.y / 100),
@@ -193,16 +201,32 @@ class PushButton:
                      int(screen_height * self.size_y / 100),
                      int(screen_height * self.fix / 100))
         self.__text_resize((self.rect[2], self.rect[3]), self.rect[4])
+        if self.style is not None:
+            self.style = pygame.transform.scale(self.style, self.rect[2:-1])
+        if self.clicked_style is not None:
+            self.clicked_style = pygame.transform.scale(self.clicked_style, self.rect[2:-1])
         return
 
     def update(self, screen):
         if self.rect is None or self.font_size is None:
-            self.resize(screen)
+            self.set_rect(screen)
 
         button = pygame.Surface((self.rect[2], self.rect[3]))
-        button.fill(self.background_color)
-
+        if self.style is None:
+            button.fill(self.background_color)
+        else:
+            if self.clicked_style is None:
+                self.clicked = False
+                button.blit(self.style, (0, 0))
+            else:
+                if self.clicked:
+                    button.blit(self.clicked_style, (0, 0))
+                    if time() - self.last_clicked_time >= 0.1:
+                        self.clicked = False
+                else:
+                    button.blit(self.style, (0, 0))
         button.set_alpha(min(self.alpha + 50, 255) if self.triggered else self.alpha)
+
         screen.blit(button, (self.rect[0], self.rect[1]))
         lines = self.text.split('\n')
         font = pygame.font.SysFont(used_font, self.font_size)
@@ -253,26 +277,34 @@ class GameMenu:
         self.towers = [tower_type for tower_type, _ in TOWERS.items()]
         self.next_wave = PushButton(7.5, 0, 10, 50)
         self.next_wave.background_color = pygame.Color('red')
-        self.next_wave.text_color = pygame.Color(255, 255, 255)
+        self.next_wave.text_color = pygame.Color(0, 0, 0)
         self.next_wave.text = 'next\nwave'
         self.next_wave.handler = 1
+        self.next_wave.style = blue_btn
+        self.next_wave.clicked_style = blue_clicked_btn
         self.next_wave.alpha = 200
 
         self.build_tower = PushButton(7.5, 50, 10, 50)
         self.build_tower.background_color = pygame.Color('red')
-        self.build_tower.text_color = pygame.Color(255, 255, 255)
+        self.build_tower.text_color = pygame.Color(0, 0, 0)
         self.build_tower.text = f'build\n{self.towers[self.current_tower]}\ncost: ' \
                                 f'{str(COSTS[self.towers[self.current_tower]])}$'
         self.build_tower.handler = 2
+        self.build_tower.style = red_btn
+        self.build_tower.clicked_style = red_clicked_btn
         self.build_tower.alpha = 200
 
         self.prev_tower = PushButton(0, 50, 7.5, 50)
         self.prev_tower.text = '<-'
         self.prev_tower.handler = -1
+        self.prev_tower.style = blue_btn
+        self.prev_tower.clicked_style = blue_clicked_btn
 
         self.next_tower = PushButton(17.5, 50, 7.5, 50)
         self.next_tower.text = '->'
         self.next_tower.handler = 1
+        self.next_tower.style = blue_btn
+        self.next_tower.clicked_style = blue_clicked_btn
 
         self.time_before_new_wave = PercentLabel(85, 0, 15, 50)
         self.time_before_new_wave.text = '20'
@@ -297,6 +329,8 @@ class GameMenu:
             self.characteristics_upgrades_buttons.append(PushButton(5 + 10 * (i + 2), 50, 10, 50))
             self.characteristics_upgrades_buttons[i].alpha = 200
             self.characteristics_upgrades_buttons[i].background_color = pygame.Color('red')
+            self.characteristics_upgrades_buttons[i].style = red_btn
+            self.characteristics_upgrades_buttons[i].clicked_style = red_clicked_btn
             self.characteristics_upgrades_buttons[i].handler = i + 5
         # self.buttons.append(next_wave)
         # self.buttons.append(build_tower)
@@ -359,12 +393,18 @@ class GameMenu:
                 if text[2] == 10:
                     button.text = 'MAX'
                     button.background_color = pygame.Color(255, 0, 0)
+                    button.set_style(red_btn)
+                    button.set_clicked_style(red_clicked_btn)
                 elif money < text[1]:
                     button.text = text[0]
-                    button.background_color = pygame.Color(255, 0, 0)
+                    button.style = red_btn
+                    button.set_style(red_btn)
+                    button.set_clicked_style(red_clicked_btn)
                 else:
                     button.text = text[0]
                     button.background_color = pygame.Color(0, 255, 0)
+                    button.set_style(green_btn)
+                    button.set_clicked_style(green_clicked_btn)
                 button.update(menu)
             self.count_of_characteristics = len(turrets_list[self.turret_id].get_costs_of_upgrades())
         self.current_wave.update(menu)
@@ -387,24 +427,32 @@ class MapCreatorMenu:
         self.new_point.text = 'new\npoint'
         self.new_point.background_color, self.new_point.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.new_point.handler = 1
+        self.new_point.style = blue_btn
+        self.new_point.clicked_style = blue_clicked_btn
         self.new_point.alpha = 200
 
         self.set_base = PushButton(0, 50, 10, 50)
         self.set_base.text = 'set\nbase'
         self.set_base.background_color, self.set_base.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.set_base.handler = 2
+        self.set_base.style = blue_btn
+        self.set_base.clicked_style = blue_clicked_btn
         self.set_base.alpha = 200
 
         self.save_map = PushButton(10, 0, 10, 50)
         self.save_map.text = 'save\nmap'
         self.save_map.background_color, self.save_map.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.save_map.handler = 3
+        self.save_map.style = blue_btn
+        self.save_map.clicked_style = blue_clicked_btn
         self.save_map.alpha = 200
 
         self.load_map = PushButton(10, 50, 10, 50)
         self.load_map.text = 'load\nmap'
         self.load_map.background_color, self.load_map.text_color = pygame.Color('red'), pygame.Color(255, 255, 255)
         self.load_map.handler = 4
+        self.load_map.style = blue_btn
+        self.load_map.clicked_style = blue_clicked_btn
         self.load_map.alpha = 200
 
     def resize(self, screen) -> None:

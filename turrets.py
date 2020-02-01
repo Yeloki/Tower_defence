@@ -2,30 +2,12 @@ from math import atan, degrees
 from time import time
 
 from pygame import Color, Surface
-from pygame import image, transform
 from pygame.draw import circle
 from pygame.locals import *
 
-from other import distance, rot_center, Vector
+from consts import inferno1, inferno2, inferno3, inferno4, laser_tower
+from other import distance, Vector
 
-inferno1 = transform.scale(image.load('images/3.jpg'), (40, 40))
-inferno2 = transform.scale(image.load('images/4.jpg'), (40, 40))
-inferno3 = transform.scale(image.load('images/2.jpg'), (40, 40))
-inferno4 = transform.scale(image.load('images/5.jpg'), (40, 40))
-laser_tower = list()
-inferno1.set_colorkey(Color(255, 255, 255))
-inferno2.set_colorkey(Color(255, 255, 255))
-inferno3.set_colorkey(Color(255, 255, 255))
-inferno4.set_colorkey(Color(255, 255, 255))
-image = transform.scale(image.load('images/1.jpg'), (80, 80))
-image.set_colorkey(Color(255, 255, 255))
-for i in range(359, -1, -1):
-    laser_tower.append(rot_center(image, i))
-
-del image
-
-
-# inferno = [inferno1, inferno2, inferno3, inferno4]
 
 class InfernoTower:
     radius_size = 20

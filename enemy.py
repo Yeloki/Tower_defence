@@ -1,27 +1,9 @@
 from random import randint
 from time import time
 
-from pygame import image, transform
-
+from consts import enemy, STATUSES
 from gui import PixelLabel
 from other import distance
-from other import rot_center
-
-STATUSES = dict()
-buffer = open('CONSTS', 'r')
-for key, val in map(lambda x: (x.split()[0], int(x.split()[1])), buffer.readlines()):
-    STATUSES[key] = val
-buffer.close()
-
-enemy = []
-images = (transform.scale(image.load('images/enemy1.png'), (40, 40)),
-          transform.scale(image.load('images/enemy2.png'), (40, 40)),
-          transform.scale(image.load('images/enemy3.png'), (40, 40)),
-          transform.scale(image.load('images/enemy4.png'), (40, 40)))
-for j in range(4):
-    enemy.append([])
-    for i in range(359, -1, -1):
-        enemy[j].append(rot_center(images[j], i))
 
 
 class Enemy:

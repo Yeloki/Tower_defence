@@ -3,13 +3,12 @@ from time import time as global_time
 from pygame.constants import *
 from pygame.draw import aaline
 
+from consts import base_texture, hp_texture, boom_map, boom_map2, STATUSES
 from enemy import Enemy
 from gui import *
 from other import Vector
 from other import distance, distance_to_vector
 from turrets import TOWERS, prototype, COSTS
-
-boom_map2 = pygame.transform.scale(pygame.image.load('images/base_explosion.png'), (1350, 900))
 
 
 class BaseExplosion(pygame.sprite.Sprite):
@@ -34,17 +33,6 @@ class BaseExplosion(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
         surface.blit(self.image, self.rect)
         return self.cur_frame == ln - 1
-
-
-hp_texture = pygame.image.load('images/cpu.png')
-base_texture = pygame.transform.scale(pygame.image.load('images/base.jpg'), (150, 100))
-boom_map = pygame.transform.scale(pygame.image.load('images/boom.png'), (240, 240))
-STATUSES = dict()
-buffer = open('CONSTS', 'r')
-for key, val in map(lambda x: (x.split()[0], int(x.split()[1])), buffer.readlines()):
-    STATUSES[key] = val
-buffer.close()
-del buffer, key, val
 
 
 class GameMap:
@@ -92,7 +80,8 @@ class GameMap:
             draw_better_line(screen, vec.begin(), vec.end(), pygame.Color(0, 62, 141), self.line_width)
         for dot in self.dots:
             pygame.draw.circle(screen, pygame.Color(0, 62, 141), dot, self.line_width)
-        self.base.update(screen, base_hp)
+        if base_hp > 0:
+            self.base.update(screen, base_hp)
 
 
 class Game:
@@ -260,7 +249,7 @@ class Game:
 
         # id for time-depends events
         second = 30
-        expl = None
+        base_explosion = None
         clock = pygame.time.Clock()
         pygame.time.set_timer(second, 1000)
         self.menu = GameMenu()
@@ -274,7 +263,7 @@ class Game:
 
                 if event.type == QUIT:
                     return 8, screen
-                if expl is None:
+                if base_explosion is None:
                     if event.type == second:  # next wave event
                         pygame.time.set_timer(second, 1000)
                         self.time -= 1
@@ -290,7 +279,7 @@ class Game:
                         return 8, screen
                     if event.key == K_ESCAPE:
                         return 0, screen
-                    if expl is None:
+                    if base_explosion is None:
                         if event.key == K_SPACE:
                             self.next_wave_sender()
                             self.time = 20
@@ -334,7 +323,7 @@ class Game:
                         want_to_build_flag = False
                         want_to_build_type = None
             # event handler cycle end
-            if expl is None:
+            if base_explosion is None:
                 wave_timers = tuple(self.wave_queue.items())
                 for key, val in wave_timers:
                     if global_time() - val[0] >= 1:
@@ -379,11 +368,19 @@ class Game:
                                          TOWERS[want_to_build_type].radius_size,
                                          want_to_build_type,
                                          screen))
-            if self.base_hp <= 0 and expl is None:
-                expl = BaseExplosion(boom_map2, 9, 9, self.game_map.base.x, self.game_map.base.y)
-            if expl is not None:
-                print(expl.cur_frame)
-                if expl.update(screen):
+            if self.base_hp <= 0 and base_explosion is None:
+                base_explosion = BaseExplosion(boom_map2, 9, 9, self.game_map.base.x, self.game_map.base.y)
+                # base_explosion = BaseExplosion(boom_map2, 9, 9, 0, 0)
+                for tower_id in [__ for __, _ in self.all_turrets.items()]:
+                    self.add_explosion(self.all_turrets[tower_id].pos())
+                    del self.all_turrets[tower_id]
+                self.focus_on = None
+                for enemy_id in [__ for __, _ in self.all_enemies_on_map.items()]:
+                    self.add_explosion(self.all_enemies_on_map[enemy_id].pos())
+                    del self.all_enemies_on_map[enemy_id]
+            if base_explosion is not None:
+                print(base_explosion.cur_frame)
+                if base_explosion.update(screen):
                     return 9, screen
 
             # fps wait and flip the display

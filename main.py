@@ -3,6 +3,7 @@ from os import environ
 from pygame import Color
 from pygame.locals import *
 
+from consts import blue_btn, blue_clicked_btn
 from game import Game
 from gui import *
 from map_creator import MapCreator
@@ -53,6 +54,23 @@ def menu() -> int:
     user_leves.background_color, user_leves.text_color = Color(255, 255, 255), Color(0, 0, 0)
     settings.background_color, settings.text_color = Color(255, 255, 255), Color(0, 0, 0)
     exit_btn.background_color, exit_btn.text_color = Color(255, 255, 255), Color(0, 0, 0)
+
+    easy_game.style = blue_btn
+    medium_game.style = blue_btn
+    hard_game.style = blue_btn
+    map_creator.style = blue_btn
+    user_leves.style = blue_btn
+    settings.style = blue_btn
+    exit_btn.style = blue_btn
+
+    easy_game.clicked_style = blue_clicked_btn
+    medium_game.clicked_style = blue_clicked_btn
+    hard_game.clicked_style = blue_clicked_btn
+    map_creator.clicked_style = blue_clicked_btn
+    user_leves.clicked_style = blue_clicked_btn
+    settings.clicked_style = blue_clicked_btn
+    exit_btn.clicked_style = blue_clicked_btn
+
     name.text_color = Color(255, 255, 255)
     easy_game.alpha = 200
     medium_game.alpha = 200
@@ -90,7 +108,7 @@ def menu() -> int:
     objects.append(name)
 
     for elem in objects:
-        elem.resize(screen)
+        elem.set_rect(screen)
     while out_state == 0 or out_state is None:
         screen.blit(pygame.transform.scale(background, (screen_width, screen_height)), (0, 0))
         for event in pygame.event.get():
