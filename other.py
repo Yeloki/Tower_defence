@@ -27,9 +27,9 @@ def near_point_on_vector(point, vec: Vector):
     x, y = point
     x1, y1 = vec.begin()
     x2, y2 = vec.end()
-    l = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
+    length = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
     pr = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)
-    cf = pr / l
+    cf = pr / length
     if cf < 0:
         cf = 0
     if cf > 1:

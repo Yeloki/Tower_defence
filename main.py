@@ -3,7 +3,6 @@ from os import environ
 from pygame import Color
 from pygame.locals import *
 
-from consts import LANGUAGE
 from game import Game
 from gui import *
 from map_creator import MapCreator
@@ -21,7 +20,7 @@ screen_width = 1024
 screen_height = 720
 minimal_screen_width = 320
 minimal_screen_height = 240
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen = pygame.display.set_mode((screen_width, screen_height), flags=DOUBLEBUF)
 clock = pygame.time.Clock()
 
 
@@ -42,16 +41,15 @@ def menu() -> int:
     medium_game = PushButton(x, 26, 20, 10)
     hard_game = PushButton(x, 38, 20, 10)
     map_creator = PushButton(x, 50, 20, 10)
-    user_leves = PushButton(x, 62, 20, 10)
+    user_level = PushButton(x, 62, 20, 10)
     settings = PushButton(x, 74, 20, 10)
     exit_btn = PushButton(x, 86, 20, 10)
-    # exit_btn = PushButton(x, 74, 20, 10)
 
     easy_game.style = blue_btn
     medium_game.style = blue_btn
     hard_game.style = blue_btn
     map_creator.style = blue_btn
-    user_leves.style = blue_btn
+    user_level.style = blue_btn
     settings.style = blue_btn
     exit_btn.style = blue_btn
 
@@ -59,7 +57,7 @@ def menu() -> int:
     medium_game.clicked_style = blue_clicked_btn
     hard_game.clicked_style = blue_clicked_btn
     map_creator.clicked_style = blue_clicked_btn
-    user_leves.clicked_style = blue_clicked_btn
+    user_level.clicked_style = blue_clicked_btn
     settings.clicked_style = blue_clicked_btn
     exit_btn.clicked_style = blue_clicked_btn
 
@@ -68,7 +66,7 @@ def menu() -> int:
     medium_game.alpha = 200
     hard_game.alpha = 200
     map_creator.alpha = 200
-    user_leves.alpha = 200
+    user_level.alpha = 200
     settings.alpha = 200
     exit_btn.alpha = 200
     if LANGUAGE == 'ENGLISH':
@@ -76,7 +74,7 @@ def menu() -> int:
         medium_game.text = 'Medium mode'
         hard_game.text = 'Hard mode'
         map_creator.text = 'Map redactor'
-        user_leves.text = "User's level"
+        user_level.text = "User's level"
         settings.text = 'Settings'
         exit_btn.text = 'Exit'
         name.text = 'Tower Defence'
@@ -85,7 +83,7 @@ def menu() -> int:
         medium_game.text = 'Средняя\nсложность'
         hard_game.text = 'Сложная\nсложность'
         map_creator.text = 'Редактор\nкарты'
-        user_leves.text = "Пользовательский\nуровень"
+        user_level.text = "Пользовательский\nуровень"
         settings.text = 'Настройки'
         exit_btn.text = 'Выйти'
         name.text = 'Tower Defence'
@@ -95,7 +93,7 @@ def menu() -> int:
     hard_game.handler = 3
     # impossible
     map_creator.handler = 5
-    user_leves.handler = 6
+    user_level.handler = 6
     settings.handler = 7
     exit_btn.handler = 8
 
@@ -103,7 +101,7 @@ def menu() -> int:
     objects.append(medium_game)
     objects.append(hard_game)
     objects.append(map_creator)
-    objects.append(user_leves)
+    objects.append(user_level)
     objects.append(settings)
     objects.append(exit_btn)
     objects.append(name)
@@ -125,7 +123,7 @@ def menu() -> int:
     return out_state
 
 
-def settings():
+def settings_menu():
     global screen, screen_width, screen_height
     x = 5
     objects = list()
@@ -246,11 +244,11 @@ while running:
     if game_state == 5:  # Map creator
         mp = MapCreator()
         game_state, screen = mp.start(screen)
-    if game_state == 6:  # challenges
+    if game_state == 6:  # user level
         game = Game(1, 'levels/user_level.txt')
         game_state, screen = game.start(screen)
     if game_state == 7:  # settings
-        game_state = settings()
+        game_state = settings_menu()
     if game_state == 8:  # for exit
         terminate()
     if game_state == 9:  # death screen

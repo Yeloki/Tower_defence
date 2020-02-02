@@ -121,22 +121,26 @@ class InfernoTower:
             self.target_id = -1
             return
         # enemies[self.target_id].get_damage(self.damage // 60)
+        enemies[self.target_id].burn_flag = True
         enemies[self.target_id].get_damage(self.damage / 60)
 
     def get_characteristics(self):
         out = [self.number_of_damage_improvements,
                self.number_of_improvements_of_range_of_attack,
                self.number_of_burning_improvements]
+        out2 = [self.max_upgrade_damage_count,
+                self.max_upgrade_range_count,
+                self.max_upgrade_burning_count]
         if LANGUAGE == 'ENGLISH':
             return tuple(zip(('damage:\n' + str(self.damage),
                               'range:\n' + str(self.range_of_attack),
                               'burning time:\n' + str(self.burning_time / 10)
-                              ), out))
+                              ), out, out2))
         else:
             return tuple(zip(('Урон:\n' + str(self.damage),
                               'Дальность атаки:\n' + str(self.range_of_attack),
                               'Время горения:\n' + str(self.burning_time / 10)
-                              ), out))
+                              ), out, out2))
 
     def get_costs_of_upgrades(self):
         out = [self.damage_update_cost,
@@ -145,25 +149,33 @@ class InfernoTower:
         out2 = [self.number_of_damage_improvements,
                 self.number_of_improvements_of_range_of_attack,
                 self.number_of_burning_improvements]
+        out3 = [self.max_upgrade_damage_count,
+                self.max_upgrade_range_count,
+                self.max_upgrade_burning_count]
         if LANGUAGE == 'ENGLISH':
             return tuple(zip(('Upgrade damage\nCost:' + str(self.damage_update_cost),
                               'Upgrade range\nCost: ' + str(self.range_update_cost),
                               'Upgrade burning\ntime\nCost: ' + str(self.burning_update_cost)
-                              ), out, out2))
+                              ), out, out2, out3))
         elif LANGUAGE == 'RUSSIAN':
             return tuple(zip(('Улучшить урон\nСтоимость:' + str(self.damage_update_cost),
                               'Улучшить\nдальность атаки\nСтоимость: ' + str(self.range_update_cost),
                               'Улучшить время\nгорения\nСтоимость: ' + str(self.burning_update_cost)
-                              ), out, out2))
+                              ), out, out2, out3))
 
     def characteristics(self):
         out = [self.number_of_damage_improvements,
                self.number_of_improvements_of_range_of_attack,
                self.number_of_burning_improvements]
+
+        out2 = [self.max_upgrade_damage_count,
+                self.max_upgrade_range_count,
+                self.max_upgrade_burning_count]
+
         return tuple(zip((self.damage_update_cost,
                           self.range_update_cost,
                           self.burning_update_cost
-                          ), out))
+                          ), out, out2))
 
 
 def prototype(screen, pos: (int, int), r, turret_range, collision: bool):
@@ -276,18 +288,22 @@ class LaserTower:
                self.number_of_improvements_of_range_of_attack,
                self.number_of_improvements_of_rate,
                self.number_of_freezing_improvements]
+        out2 = [self.max_upgrade_damage_count,
+                self.max_upgrade_range_count,
+                self.max_upgrade_rate_count,
+                self.max_upgrade_freezing_count]
         if LANGUAGE == 'ENGLISH':
             return tuple(zip(('damage:\n' + str(self.damage),
                               'range:\n' + str(self.range_of_attack),
                               'rate:\n' + str(self.rate / 10),
                               'freezing time:\n' + str(self.freezing_time / 10)
-                              ), out))
+                              ), out, out2))
         elif LANGUAGE == 'RUSSIAN':
             return tuple(zip(('Урон:\n' + str(self.damage),
                               'Далность\nатаки:\n' + str(self.range_of_attack),
                               'Выстрелов в\nсекунду:\n' + str(self.rate / 10),
                               'Время\nзаморозки:\n' + str(self.freezing_time / 10)
-                              ), out))
+                              ), out, out2))
 
     def get_costs_of_upgrades(self):
         out = [self.damage_update_cost,
@@ -298,18 +314,22 @@ class LaserTower:
                 self.number_of_improvements_of_range_of_attack,
                 self.number_of_improvements_of_rate,
                 self.number_of_freezing_improvements]
+        out3 = [self.max_upgrade_damage_count,
+                self.max_upgrade_range_count,
+                self.max_upgrade_rate_count,
+                self.max_upgrade_freezing_count]
         if LANGUAGE == 'ENGLISH':
             return tuple(zip(('Upgrade damage\nCost:' + str(self.damage_update_cost),
                               'Upgrade range\nCost: ' + str(self.range_update_cost),
                               'Upgrade rate\nCost: ' + str(self.rate_update_cost),
                               'Upgrade freezing\ntime\nCost: ' + str(self.freezing_update_cost)
-                              ), out, out2))
+                              ), out, out2, out3))
         elif LANGUAGE == 'RUSSIAN':
             return tuple(zip(('Улучшить урон\nСтоимость: ' + str(self.damage_update_cost),
                               'Улучшить\nдальность\nатаки\nСтоимость: ' + str(self.range_update_cost),
                               'Улучшить\nскорострельность\nСтоимость: ' + str(self.rate_update_cost),
                               'Улучшить время\nзаморозки\nСтоимость: ' + str(self.freezing_update_cost)
-                              ), out, out2))
+                              ), out, out2, out3))
 
     def characteristics(self):
         out = [self.number_of_damage_improvements,
@@ -317,11 +337,17 @@ class LaserTower:
                self.number_of_improvements_of_rate,
                self.number_of_freezing_improvements]
 
+        out2 = [self.max_upgrade_damage_count,
+                self.max_upgrade_range_count,
+                self.max_upgrade_rate_count,
+                self.max_upgrade_freezing_count]
+
         return tuple(zip((self.damage_update_cost,
                           self.range_update_cost,
                           self.rate_update_cost,
                           self.freezing_update_cost
-                          ), out))
+                          ),
+                         out, out2))
 
     # def description(self):
     #     return ''
@@ -336,13 +362,18 @@ class LaserTower:
         colors = Color(117, 4, 157), Color(255, 212, 255)
         if self.target_id != -1 and self.target_id in enemies:
             try:
-                k = 0
                 vec = Vector(*self.pos(), *enemies[self.target_id].pos())
-                tan = (vec.begin()[1] - vec.end()[1]) / (vec.begin()[0] - vec.end()[0])
-                if ((vec.begin()[1] - vec.end()[1]) > 0 and (vec.begin()[0] - vec.end()[0]) > 0) or \
-                        ((vec.begin()[1] - vec.end()[1]) <= 0 < (vec.begin()[0] - vec.end()[0])):
-                    k = -180
-                self.angle = (90 + int(degrees(atan(tan))) + k) % 360
+                if vec.begin()[0] - vec.end()[0] == 0 and \
+                        vec.begin()[1] - vec.end()[1]< 0:
+                    self.angle = 180 % 360
+                else:
+                    k = 0
+
+                    tan = (vec.begin()[1] - vec.end()[1]) / (vec.begin()[0] - vec.end()[0])
+                    if ((vec.begin()[1] - vec.end()[1]) > 0 and (vec.begin()[0] - vec.end()[0]) > 0) or \
+                            ((vec.begin()[1] - vec.end()[1]) <= 0 < (vec.begin()[0] - vec.end()[0])):
+                        k = -180
+                    self.angle = (90 + int(degrees(atan(tan))) + k) % 360
             except ZeroDivisionError:
                 self.angle = 0
         surface.blit(laser_tower[self.angle],

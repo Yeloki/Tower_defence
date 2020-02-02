@@ -35,29 +35,32 @@ def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None):
 
 
 def draw_better_line(screen, point1, point2, color, width):
-    x1, y1, x2, y2 = *point1, *point2
+    x1, y1 = point1
+    x2, y2 = point2
     dx = x2 - x1
     dy = y2 - y1
-    len = math.sqrt(dx * dx + dy * dy)
-    udx = dx / len
-    udy = dy / len
-    perpx = -udy * width
-    perpy = udx * width
+    length = math.sqrt(dx * dx + dy * dy)
+    udx = dx / length
+    udy = dy / length
+    perpendicular_x = -udy * width
+    perpendicular_y = udx * width
+
     # "left" line start
-    x1_ = x1 + perpx
-    y1_ = y1 + perpy
+    x1_ = x1 + perpendicular_x
+    y1_ = y1 + perpendicular_y
+
     # "left" line end
     x2_ = x1_ + dx
     y2_ = y1_ + dy
+
     # "right" line start
-    x1__ = x1 - perpx
-    y1__ = y1 - perpy
+    x1__ = x1 - perpendicular_x
+    y1__ = y1 - perpendicular_y
+
     # "right" line start
     x2__ = x1__ + dx
     y2__ = y1__ + dy
-    points = ((x1_, y1_), (x2_, y2_), (x2__, y2__), (x1__, y1__))
-    pygame.draw.polygon(screen, color, points)
-    pass
+    pygame.draw.polygon(screen, color, ((x1_, y1_), (x2_, y2_), (x2__, y2__), (x1__, y1__)))
 
 
 # All sizes stated in percent
@@ -114,9 +117,9 @@ class PercentLabel:
             screen.blit(text,
                         (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
 
-    # stubs
+    # stubs2
     @staticmethod
-    def event_handler(event) -> None:
+    def event_handler(_) -> None:
         return None
 
 
@@ -257,12 +260,11 @@ class PixelLabel:
 
     # stubs
     @staticmethod
-    def event_handler(event) -> None:
+    def event_handler(_) -> None:
         return None
 
 
 class GameMenu:
-    # buttons = list()
     labels = list()
     height = 15
     rect = None
@@ -339,10 +341,6 @@ class GameMenu:
             self.characteristics_upgrades_buttons[i].style = red_btn
             self.characteristics_upgrades_buttons[i].clicked_style = red_clicked_btn
             self.characteristics_upgrades_buttons[i].handler = i + 5
-        # self.buttons.append(next_wave)
-        # self.buttons.append(build_tower)
-        # self.buttons.append(next_tower)
-        # self.buttons.append(prev_tower)
         pass
 
     def event_handler(self, event):
@@ -364,11 +362,11 @@ class GameMenu:
                  self.build_tower,
                  *self.characteristics_upgrades_buttons[:self.count_of_characteristics]), event, *self.rect[:2])
         else:
-            a = emit_event_to_objects((self.next_wave, self.build_tower,), event, *self.rect[:2])
+            a = emit_event_to_objects((self.next_wave, self.build_tower), event, *self.rect[:2])
         print(self.current_tower)
         return a
 
-    def resize(self, screen) -> None:
+    def set_rect(self, screen) -> None:
         screen_height, screen_width = screen.get_height(), screen.get_width()
         self.rect = (
             int(screen_width * 0 / 100),
@@ -392,7 +390,7 @@ class GameMenu:
             self.kills.text = 'Убийств:\n' + str(kills)
 
         if self.rect is None:
-            self.resize(screen)
+            self.set_rect(screen)
 
         menu = pygame.Surface(self.rect[2:], pygame.SRCALPHA)
         menu.fill(pygame.Color(100, 50, 100, 100))
@@ -401,18 +399,18 @@ class GameMenu:
         if self.turret_id is not None:  # if user check turret characteristics
             for label, text in zip(self.characteristics_labels,
                                    turrets_list[self.turret_id].get_characteristics()):
-                if text[1] == 10:
-                    label.text = text[0] + ' (MAX)'
+                if text[1] == text[2]:
+                    label.text = text[0] + '(MAX)'
                 else:
                     label.text = text[0]
                 label.update(menu)
             for button, text in zip(self.characteristics_upgrades_buttons,
                                     turrets_list[self.turret_id].get_costs_of_upgrades()):
-                if text[2] == 10:
+                if text[2] == text[3]:
                     button.text = '\nMAX'
-                    button.background_color = pygame.Color(255, 0, 0)
                     button.set_style(red_btn)
                     button.set_clicked_style(red_clicked_btn)
+
                 elif money < text[1]:
                     button.text = text[0]
                     button.style = red_btn
@@ -420,7 +418,6 @@ class GameMenu:
                     button.set_clicked_style(red_clicked_btn)
                 else:
                     button.text = text[0]
-                    button.background_color = pygame.Color(0, 255, 0)
                     button.set_style(green_btn)
                     button.set_clicked_style(green_clicked_btn)
                 button.update(menu)
@@ -493,7 +490,7 @@ class MapCreatorMenu:
             self.align_to_grid.text = 'Выровнять\nпо сетке'
             self.clear_map.text = 'Очистить\nкарту'
 
-    def resize(self, screen) -> None:
+    def set_rect(self, screen) -> None:
         screen_height, screen_width = screen.get_height(), screen.get_width()
         self.rect = (
             int(screen_width * 0 / 100),
@@ -525,16 +522,19 @@ class MapCreatorMenu:
         return a
 
     def update(self, screen, is_base_built):
+
         self.is_base_built = is_base_built
         if self.rect is None:
-            self.resize(screen)
+            self.set_rect(screen)
         menu = pygame.Surface(self.rect[2:], pygame.SRCALPHA)
         menu.fill(pygame.Color(100, 50, 100, 100))
-        self.new_point.update(menu)
         if not is_base_built:
             self.set_base.update(menu)
+
+        self.new_point.update(menu)
         self.save_map.update(menu)
         self.load_map.update(menu)
         self.align_to_grid.update(menu)
         self.clear_map.update(menu)
+
         screen.blit(menu, (self.rect[0], self.rect[1]))

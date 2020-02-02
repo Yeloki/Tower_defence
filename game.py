@@ -150,7 +150,6 @@ class Game:
         self.all_animations_key = (self.all_animations_key + 1) % 100000
 
     def detected_enemy(self):
-        a = distance
         busy = list()
         for enemy_id, enemy in self.all_enemies_on_map.items():
             for turret_id, turret in self.all_turrets.items():
@@ -191,7 +190,10 @@ class Game:
 
     def next_wave_sender(self):
         self.current_wave += 1
-        self.wave_queue[self.current_wave] = [0, self.wave_size]
+        if self.current_wave % 10 != 0:
+            self.wave_queue[self.current_wave] = [0, self.wave_size]
+        else:
+            self.wave_queue[self.current_wave] = [0, 1]
         self.enemies_sender(self.current_wave)
 
     def enemies_sender(self, ev_id):
@@ -238,16 +240,13 @@ class Game:
         pass
 
     def turret_upgrade(self, type_of_update):
-        if self.money >= self.all_turrets[self.focus_on].characteristics()[type_of_update][0] and \
-                self.all_turrets[self.focus_on].characteristics()[type_of_update][1] != 10:
-            self.money -= self.all_turrets[self.focus_on].characteristics()[type_of_update][0]
+        characteristics = self.all_turrets[self.focus_on].characteristics()[type_of_update]
+        if self.money >= characteristics[0] and \
+                characteristics[1] != characteristics[2]:
+            self.money -= characteristics[0]
             self.all_turrets[self.focus_on].upgrade(type_of_update)
 
     def start(self, screen) -> (int, pygame.Surface):
-        screen_width = screen.get_width()
-        screen_height = screen.get_height()
-
-        # id for time-depends events
         second = 30
         base_explosion = None
         clock = pygame.time.Clock()
@@ -328,8 +327,8 @@ class Game:
                 for key, val in wave_timers:
                     if global_time() - val[0] >= 1:
                         self.enemies_sender(key)
-                self.move_enemies()
                 self.detected_enemy()
+                self.move_enemies()
 
                 # handling state that returns a menu
                 if state == 1:

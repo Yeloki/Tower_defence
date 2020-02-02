@@ -7,11 +7,10 @@ from other import distance
 
 
 class Enemy:
-    r_size = 1
     i = 0
     wave = 1
     max_hp = 0
-    abs_r_size = None
+    abs_r_size = 40
     game_map = None
     image = None
     angle = 0
@@ -25,7 +24,7 @@ class Enemy:
 
         self.burn_flag = False
         self.burn_time = 0
-        self.time_last_burn = time()
+        self.time_last_burn = 0
         self.burn_damage = 0
 
         self.game_map = game_map
@@ -35,12 +34,7 @@ class Enemy:
         self.x, self.y = game_map[self.i].begin()
         self.speed = 1.8 + (difficult - 1) * 0.7
 
-    def resize(self, screen):
-        self.abs_r_size = self.r_size * 20
-
     def update(self, screen) -> int:
-        if self.abs_r_size is None:
-            self.resize(screen)
         text = int((self.hp / self.max_hp) * 100)
         if self.hp <= 0 or text == 0:
             return STATUSES['ENEMY_STATUS_DIED']
@@ -52,6 +46,10 @@ class Enemy:
         screen.blit(enemy[enemy_type][self.angle],
                     (int(self.x - 20 + randint(-1, 1) / 2), int(self.y - 20 + randint(-1, 1) / 2)))
         lb.update(screen)
+        if self.burn_flag:
+            self.get_damage(self.burn_damage)
+            if time() - self.time_last_burn >= self.burn_time:
+                self.burn_flag = False
         return STATUSES[self.current_status]
 
     def freeze(self, freeze_time):
@@ -75,10 +73,7 @@ class Enemy:
                 self.freeze_flag = False
         else:
             speed = self.speed
-        if self.burn_flag:
-            self.get_damage(self.burn_damage)
-            if time() - self.time_last_burn >= self.burn_time:
-                self.burn_flag = False
+
         print(self.i)
         print(speed)
         print(distance((self.x, self.y), self.game_map[self.i].end()))
@@ -100,14 +95,18 @@ class Enemy:
         print((self.game_map[self.i].len_x / self.game_map[self.i].len()))
         try:
             k = 0
-            tan = (self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) / \
-                  (self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0])
-            if ((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) > 0 and
-                (self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0]) > 0) or \
-                    ((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) <= 0 < (
-                            self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0])):
-                k = -180
-            self.angle = (90 + int(degrees(atan(tan))) + randint(-2, 2) + k) % 360
+            if self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0] == 0 and \
+                    self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1] < 0:
+                self.angle = (180 + randint(-2, 2)) % 360
+            else:
+                tan = (self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) / \
+                      (self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0])
+                if ((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) > 0 and
+                    (self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0]) > 0) or \
+                        ((self.game_map[self.i].begin()[1] - self.game_map[self.i].end()[1]) <= 0 < (
+                                self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0])):
+                    k = -180
+                self.angle = (90 + int(degrees(atan(tan))) + randint(-2, 2) + k) % 360
         except ZeroDivisionError:
             self.angle = randint(-2, 2) % 360
 
