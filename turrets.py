@@ -20,7 +20,7 @@ class InfernoTower:
         self.damage_update_cost = 40
         self.number_of_damage_improvements = 1  # count of updates (damage)
         self.damage_update_value = 120
-        self.max_upgrade_damage_count = 10
+        self.max_upgrade_damage_count = 30
 
         # range
         self.number_of_improvements_of_range_of_attack = 1  # count of updates (range)
@@ -117,10 +117,11 @@ class InfernoTower:
         if self.target_id == -1 or self.target_id not in enemies:
             return
         if distance(enemies[self.target_id].pos(), self.pos()) >= self.range_of_attack:
+            enemies[self.target_id].burn(self.burning_time / 10, self.damage / 60)
             self.target_id = -1
             return
         # enemies[self.target_id].get_damage(self.damage // 60)
-        enemies[self.target_id].burn(self.burning_time / 10, self.damage / 60)
+        enemies[self.target_id].get_damage(self.damage / 60)
 
     def get_characteristics(self):
         out = [self.number_of_damage_improvements,
@@ -151,7 +152,7 @@ class InfernoTower:
                               ), out, out2))
         elif LANGUAGE == 'RUSSIAN':
             return tuple(zip(('Улучшить урон\nСтоимость:' + str(self.damage_update_cost),
-                              'Улучшить дальность\nатаки\nСтоимость: ' + str(self.range_update_cost),
+                              'Улучшить\nдальность атаки\nСтоимость: ' + str(self.range_update_cost),
                               'Улучшить время\nгорения\nСтоимость: ' + str(self.burning_update_cost)
                               ), out, out2))
 
@@ -183,7 +184,7 @@ class LaserTower:
         self.damage_update_cost = 20
         self.damage_update_value = 60
         self.number_of_damage_improvements = 1  # count of updates (damage)
-        self.max_upgrade_damage_count = 10
+        self.max_upgrade_damage_count = 30
 
         # range
         self.number_of_improvements_of_range_of_attack = 1  # count of updates (range)
@@ -196,7 +197,7 @@ class LaserTower:
         self.number_of_improvements_of_rate = 1  # count of updates (rate)
         self.rate_update_cost = 10
         self.rate_upgrade_value = 4
-        self.max_upgrade_rate_count = 10
+        self.max_upgrade_rate_count = 30
 
         # freeze
         self.freezing_time = 3
