@@ -4,6 +4,7 @@ import pygame
 from pygame import transform, draw, Color, image
 from pygame.locals import *
 
+from consts import base_texture
 from gui import draw_better_line, MapCreatorMenu
 from other import Vector, distance, near_point_on_vector
 
@@ -11,7 +12,6 @@ from other import Vector, distance, near_point_on_vector
 class MapCreator:
     class Base:
         triggered = False
-        base_texture = None
         x, y = 0, 0
         base_size = 150, 100
 
@@ -55,9 +55,9 @@ class MapCreator:
             return {distance(point, i_point): i_point for i_point in points}[min_dist]
 
         def update(self, screen):
-            if self.base_texture is not None:
+            if base_texture is not None:
                 if self.base_size is not None:
-                    screen.blit(transform.scale(self.base_texture, self.base_size[:2]), (self.base_size[2:]))
+                    screen.blit(transform.scale(base_texture, self.base_size[:2]), (self.x, self.y))
                     if self.triggered:
                         draw.rect(screen, Color(0, 255, 0, 100), Rect(self.x, self.y, *self.base_size), 5)
             else:

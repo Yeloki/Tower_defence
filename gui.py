@@ -4,7 +4,7 @@ from time import time
 import pygame
 
 from consts import used_font, NUMS, green_btn, green_clicked_btn, \
-    red_btn, red_clicked_btn, blue_clicked_btn, blue_btn
+    red_btn, red_clicked_btn, blue_clicked_btn, blue_btn, LANGUAGE
 from turrets import TOWERS, COSTS
 
 
@@ -275,20 +275,24 @@ class GameMenu:
 
     def __init__(self):
         self.towers = [tower_type for tower_type, _ in TOWERS.items()]
+
         self.next_wave = PushButton(7.5, 0, 10, 50)
-        self.next_wave.background_color = pygame.Color('red')
-        self.next_wave.text_color = pygame.Color(0, 0, 0)
-        self.next_wave.text = 'next\nwave'
+        if LANGUAGE == 'ENGLISH':
+            self.next_wave.text = 'next\nwave'
+        elif LANGUAGE == 'RUSSIAN':
+            self.next_wave.text = 'следующая\nволна'
         self.next_wave.handler = 1
         self.next_wave.style = blue_btn
         self.next_wave.clicked_style = blue_clicked_btn
         self.next_wave.alpha = 200
 
         self.build_tower = PushButton(7.5, 50, 10, 50)
-        self.build_tower.background_color = pygame.Color('red')
-        self.build_tower.text_color = pygame.Color(0, 0, 0)
-        self.build_tower.text = f'build\n{self.towers[self.current_tower]}\ncost: ' \
-                                f'{str(COSTS[self.towers[self.current_tower]])}$'
+        if LANGUAGE == 'ENGLISH':
+            self.build_tower.text = f'build\n{self.towers[self.current_tower]}\ncost: ' \
+                                    f'{str(COSTS[self.towers[self.current_tower]])}$'
+        elif LANGUAGE == 'RUSSIAN':
+            self.build_tower.text = f'Построить\n{self.towers[self.current_tower]}\nЦена: ' \
+                                    f'{str(COSTS[self.towers[self.current_tower]])}$'
         self.build_tower.handler = 2
         self.build_tower.style = red_btn
         self.build_tower.clicked_style = red_clicked_btn
@@ -319,7 +323,10 @@ class GameMenu:
         self.current_wave.text_color = pygame.Color(255, 255, 255)
 
         self.kills = PercentLabel(75, 50, 10, 50)
-        self.kills.text = 'kills:\n0'
+        if LANGUAGE == 'ENGLISH':
+            self.kills.text = 'kills:\n0'
+        elif LANGUAGE == 'RUSSIAN':
+            self.kills.text = 'убийств:\n0'
         self.kills.text_color = pygame.Color(255, 255, 255)
 
         for i in range(5):
@@ -345,8 +352,12 @@ class GameMenu:
         self.current_tower = (self.current_tower + (i if i is not None else 0)) % len(self.towers)
         if i is not None:
             self.build_tower.handler = 2 + self.current_tower
-            self.build_tower.text = f'build\n{self.towers[self.current_tower]}\ncost: ' \
-                                    f'{str(COSTS[self.towers[self.current_tower]])}$'
+            if LANGUAGE == 'ENGLISH':
+                self.build_tower.text = f'build\n{self.towers[self.current_tower]}\ncost: ' \
+                                        f'{str(COSTS[self.towers[self.current_tower]])}$'
+            elif LANGUAGE == 'RUSSIAN':
+                self.build_tower.text = f'Построить\n{self.towers[self.current_tower]}\nЦена: ' \
+                                        f'{str(COSTS[self.towers[self.current_tower]])}$'
         if self.turret_id is not None:
             a = emit_event_to_objects(
                 (self.next_wave,
@@ -369,10 +380,17 @@ class GameMenu:
 
     def update(self, screen, time_to_next_wave, money, turret_id, turrets_list, kills, cur_wave):
         self.turret_id = turret_id
-        self.time_before_new_wave.text = 'Time before\nnext wave:' + str(time_to_next_wave)
-        self.money_label.text = str(money) + '$'
-        self.current_wave.text = 'wave:\n' + str(cur_wave)
-        self.kills.text = 'kills:\n' + str(kills)
+        if LANGUAGE == 'ENGLISH':
+            self.time_before_new_wave.text = 'Time before\nnext wave:' + str(time_to_next_wave)
+            self.money_label.text = 'Money:\n' + str(money) + '$'
+            self.current_wave.text = 'wave:\n' + str(cur_wave)
+            self.kills.text = 'kills:\n' + str(kills)
+        else:
+            self.time_before_new_wave.text = 'Время перед\nследующей волной:\n' + str(time_to_next_wave)
+            self.money_label.text = 'Деньги:\n' + str(money) + '$'
+            self.current_wave.text = 'Волна:\n' + str(cur_wave)
+            self.kills.text = 'Убийств:\n' + str(kills)
+
         if self.rect is None:
             self.resize(screen)
 
@@ -424,46 +442,56 @@ class MapCreatorMenu:
     def __init__(self):
         self.is_base_built = False
         self.new_point = PushButton(0, 0, 10, 50)
-        self.new_point.text = 'new\npoint'
         self.new_point.handler = 1
         self.new_point.style = blue_btn
         self.new_point.clicked_style = blue_clicked_btn
         self.new_point.alpha = 200
 
         self.set_base = PushButton(0, 50, 10, 50)
-        self.set_base.text = 'set\nbase'
+
         self.set_base.handler = 2
         self.set_base.style = blue_btn
         self.set_base.clicked_style = blue_clicked_btn
         self.set_base.alpha = 200
 
         self.save_map = PushButton(10, 0, 10, 50)
-        self.save_map.text = 'save\nmap'
         self.save_map.handler = 3
         self.save_map.style = blue_btn
         self.save_map.clicked_style = blue_clicked_btn
         self.save_map.alpha = 200
 
         self.load_map = PushButton(10, 50, 10, 50)
-        self.load_map.text = 'load\nmap'
         self.load_map.handler = 4
         self.load_map.style = blue_btn
         self.load_map.clicked_style = blue_clicked_btn
         self.load_map.alpha = 200
 
         self.align_to_grid = PushButton(20, 50, 10, 50)
-        self.align_to_grid.text = 'Align\nto Grid'
         self.align_to_grid.handler = 5
         self.align_to_grid.style = blue_btn
         self.align_to_grid.clicked_style = blue_clicked_btn
         self.align_to_grid.alpha = 200
 
         self.clear_map = PushButton(20, 0, 10, 50)
-        self.clear_map.text = 'Clear\nmap'
         self.clear_map.handler = 6
         self.clear_map.style = blue_btn
         self.clear_map.clicked_style = blue_clicked_btn
         self.clear_map.alpha = 200
+
+        if LANGUAGE == 'ENGLISH':
+            self.new_point.text = 'new\npoint'
+            self.set_base.text = 'set\nbase'
+            self.save_map.text = 'save\nmap'
+            self.load_map.text = 'load\nmap'
+            self.align_to_grid.text = 'Align\nto Grid'
+            self.clear_map.text = 'Clear\nmap'
+        elif LANGUAGE == 'RUSSIAN':
+            self.new_point.text = 'Новая\nточка'
+            self.set_base.text = 'Поставить\nбазу'
+            self.save_map.text = 'Сохранить\nкарту'
+            self.load_map.text = 'Загрузить\nкарту'
+            self.align_to_grid.text = 'Выровнять\nпо сетке'
+            self.clear_map.text = 'Очистить\nкарту'
 
     def resize(self, screen) -> None:
         screen_height, screen_width = screen.get_height(), screen.get_width()

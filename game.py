@@ -8,7 +8,7 @@ from enemy import Enemy
 from gui import *
 from other import Vector
 from other import distance, distance_to_vector
-from turrets import TOWERS, prototype, COSTS
+from turrets import TOWERS, prototype, COSTS, ALL_TOWERS
 
 
 class BaseExplosion(pygame.sprite.Sprite):
@@ -339,11 +339,11 @@ class Game:
                 if state == 2:
                     print('built')
                     want_to_build_flag = True
-                    want_to_build_type = 'InfernoTower'
+                    want_to_build_type = ALL_TOWERS[0]
                 if state == 3:
                     print('built')
                     want_to_build_flag = True
-                    want_to_build_type = 'LaserTower'
+                    want_to_build_type = ALL_TOWERS[1]
                 if state in (5, 6, 7, 8, 9):  # reserved for upgrades
                     self.turret_upgrade(state - 5)
 
