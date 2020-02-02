@@ -73,10 +73,6 @@ class Enemy:
                 self.freeze_flag = False
         else:
             speed = self.speed
-
-        print(self.i)
-        print(speed)
-        print(distance((self.x, self.y), self.game_map[self.i].end()))
         if distance((self.x, self.y), self.game_map[self.i].end()) <= speed * 2:
             if self.i + 1 == len(self.game_map):
                 self.current_status = 'ENEMY_STATUS_TO_GET_TO_BASE'
@@ -88,11 +84,6 @@ class Enemy:
 
         self.x += speed * (self.game_map[self.i].len_x / self.game_map[self.i].len())
         self.y += speed * (self.game_map[self.i].len_y / self.game_map[self.i].len())
-        print(self.i)
-        if self.x < 0:
-            print(self.game_map[self.i].begin(), self.game_map[self.i].end())
-
-        print((self.game_map[self.i].len_x / self.game_map[self.i].len()))
         try:
             k = 0
             if self.game_map[self.i].begin()[0] - self.game_map[self.i].end()[0] == 0 and \

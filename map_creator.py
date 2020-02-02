@@ -114,7 +114,6 @@ class MapCreator:
 
     def load(self, name):
         self.changes_stack.append((deepcopy(self.dots), deepcopy(self.base), deepcopy(self.dot_id)))
-        print(self.changes_stack)
 
         file = open('levels/' + name + '.txt', 'r').readlines()
         self.base = self.Base(*tuple(map(int, file[0].split()))[:-2], True)
@@ -136,9 +135,7 @@ class MapCreator:
             pos = tuple(self.dots.items())[-1][1].pos()
             file.write(' '.join(map(str, map(int, self.base.get_near_point_to_point(pos)))) + '\n')
         except Exception as err:
-            print(err)
-        else:
-            print('success')
+            pass
 
     def update_map(self, screen):
         screen_width, screen_height = screen.get_width(), screen.get_height()
@@ -209,7 +206,6 @@ class MapCreator:
         if len(self.changes_stack) >= 1:
             self.dots, self.base, self.dot_id = self.changes_stack[-1]
             del self.changes_stack[-1]
-            print('rolled back success')
 
     def start(self, screen):
         out_state = 0

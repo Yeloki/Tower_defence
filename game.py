@@ -68,7 +68,6 @@ class GameMap:
         file = tuple(map(lambda x: tuple(map(int, x.split())), file[1:]))
         self.dots = [i for i in file]
         self.game_map = [Vector(*file[i], *file[i + 1]) for i in range(len(file) - 1)]
-        print(file)
 
     def get_map(self):
         return self.game_map
@@ -197,7 +196,6 @@ class Game:
         self.enemies_sender(self.current_wave)
 
     def enemies_sender(self, ev_id):
-        print('send')
         self.wave_queue[ev_id][1] -= 1
         self.all_enemies_on_map[self.enemy_id] = Enemy(self.game_map.get_map(), wave=ev_id, difficult=self.difficult)
         self.enemy_id = (self.enemy_id + 1) % 100000
@@ -215,7 +213,6 @@ class Game:
         for vec in self.game_map.get_map():
             test.append(distance_to_vector(pos, vec))
             if distance_to_vector(pos, vec) - self.game_map.line_width <= r:
-                print(min(test))
                 return True
         x, y = pos
         if x + r in range(self.menu.rect[0], self.menu.rect[2] + self.menu.rect[0] + 1) and \
@@ -269,7 +266,6 @@ class Game:
                         if self.time == 0:
                             self.next_wave_sender()
                             self.time = 20
-                        print('second passed')
 
                 if event.type == KEYDOWN:  # hot-keys
                     if event.key == K_c:  # cheat button (add money)
@@ -336,11 +332,9 @@ class Game:
                     self.time = 20
                     self.next_wave_sender()
                 if state == 2:
-                    print('built')
                     want_to_build_flag = True
                     want_to_build_type = ALL_TOWERS[0]
                 if state == 3:
-                    print('built')
                     want_to_build_flag = True
                     want_to_build_type = ALL_TOWERS[1]
                 if state in (5, 6, 7, 8, 9):  # reserved for upgrades
@@ -378,7 +372,6 @@ class Game:
                     self.add_explosion(self.all_enemies_on_map[enemy_id].pos())
                     del self.all_enemies_on_map[enemy_id]
             if base_explosion is not None:
-                print(base_explosion.cur_frame)
                 if base_explosion.update(screen):
                     return 9, screen
 

@@ -29,7 +29,6 @@ def emit_event_to_objects(obj_list, event, fix_x=None, fix_y=None):
         else:
             a = obj.event_handler(event)
         if a is not None:
-            print(a)
             return a
     return None
 
@@ -355,7 +354,6 @@ class GameMenu:
                  *self.characteristics_upgrades_buttons[:self.count_of_characteristics]), event, *self.rect[:2])
         else:
             a = emit_event_to_objects((self.next_wave, self.build_tower), event, *self.rect[:2])
-        print(self.current_tower)
         return a
 
     def set_rect(self, screen) -> None:
