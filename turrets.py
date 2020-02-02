@@ -158,9 +158,9 @@ class InfernoTower:
                               'Upgrade burning\ntime\nCost: ' + str(self.burning_update_cost)
                               ), out, out2, out3))
         elif LANGUAGE == 'RUSSIAN':
-            return tuple(zip(('Улучшить урон\nСтоимость:' + str(self.damage_update_cost),
-                              'Улучшить\nдальность атаки\nСтоимость: ' + str(self.range_update_cost),
-                              'Улучшить время\nгорения\nСтоимость: ' + str(self.burning_update_cost)
+            return tuple(zip(('Увеличить урон\nСтоимость:' + str(self.damage_update_cost),
+                              'Увеличить\nдальность атаки\nСтоимость: ' + str(self.range_update_cost),
+                              'Увеличить время\nгорения\nСтоимость: ' + str(self.burning_update_cost)
                               ), out, out2, out3))
 
     def characteristics(self):
@@ -325,10 +325,10 @@ class LaserTower:
                               'Upgrade freezing\ntime\nCost: ' + str(self.freezing_update_cost)
                               ), out, out2, out3))
         elif LANGUAGE == 'RUSSIAN':
-            return tuple(zip(('Улучшить урон\nСтоимость: ' + str(self.damage_update_cost),
-                              'Улучшить\nдальность\nатаки\nСтоимость: ' + str(self.range_update_cost),
-                              'Улучшить\nскорострельность\nСтоимость: ' + str(self.rate_update_cost),
-                              'Улучшить время\nзаморозки\nСтоимость: ' + str(self.freezing_update_cost)
+            return tuple(zip(('Увеличить урон\nСтоимость: ' + str(self.damage_update_cost),
+                              'Увеличить\nдальность\nатаки\nСтоимость: ' + str(self.range_update_cost),
+                              'Увеличить\nскорострельность\nСтоимость: ' + str(self.rate_update_cost),
+                              'Увеличить время\nзаморозки\nСтоимость: ' + str(self.freezing_update_cost)
                               ), out, out2, out3))
 
     def characteristics(self):

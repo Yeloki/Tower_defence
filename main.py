@@ -79,9 +79,9 @@ def menu() -> int:
         exit_btn.text = 'Exit'
         name.text = 'Tower Defence'
     elif LANGUAGE == 'RUSSIAN':
-        easy_game.text = 'Легкая\nсложность'
+        easy_game.text = 'Низкая\nсложность'
         medium_game.text = 'Средняя\nсложность'
-        hard_game.text = 'Сложная\nсложность'
+        hard_game.text = 'Высокая\nсложность'
         map_creator.text = 'Редактор\nкарты'
         user_level.text = "Пользовательский\nуровень"
         settings.text = 'Настройки'

@@ -45,12 +45,10 @@ for j in range(4):
         enemy[j].append(rot_center(images[j], i))
 
 red_btn = pygame.image.load('images/red_btn.png')
-yellow_btn = pygame.image.load('images/yellow_btn.png')
 green_btn = pygame.image.load('images/green_btn.png')
 blue_btn = pygame.image.load('images/blue_btn.png')
 
 red_clicked_btn = pygame.image.load('images/red_clicked_btn.png')
-yellow_clicked_btn = pygame.image.load('images/yellow_clicked_btn.png')
 green_clicked_btn = pygame.image.load('images/green_clicked_btn.png')
 blue_clicked_btn = pygame.image.load('images/blue_clicked_btn.png')
 

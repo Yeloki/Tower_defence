@@ -128,7 +128,6 @@ class PushButton:
 
     def __init__(self, x: 'x in percent', y, size_x, size_y):
         self.text_color: pygame.Color = pygame.Color(0, 0, 0)
-        self.background_color: pygame.Color = pygame.Color(255, 255, 255)
         self.text: str = ''
         self.fix = 0.1
         self.alpha: int = 200
@@ -215,19 +214,12 @@ class PushButton:
             self.set_rect(screen)
 
         button = pygame.Surface((self.rect[2], self.rect[3]))
-        if self.style is None:
-            button.fill(self.background_color)
-        else:
-            if self.clicked_style is None:
+        if self.clicked:
+            button.blit(self.clicked_style, (0, 0))
+            if time() - self.last_clicked_time >= 0.1:
                 self.clicked = False
-                button.blit(self.style, (0, 0))
-            else:
-                if self.clicked:
-                    button.blit(self.clicked_style, (0, 0))
-                    if time() - self.last_clicked_time >= 0.1:
-                        self.clicked = False
-                else:
-                    button.blit(self.style, (0, 0))
+        else:
+            button.blit(self.style, (0, 0))
         button.set_alpha(min(self.alpha + 50, 255) if self.triggered else self.alpha)
 
         screen.blit(button, (self.rect[0], self.rect[1]))
