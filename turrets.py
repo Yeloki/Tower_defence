@@ -5,7 +5,7 @@ from pygame import Color, Surface
 from pygame.draw import circle
 from pygame.locals import *
 
-from consts import inferno1, inferno2, inferno3, inferno4, laser_tower, LANGUAGE, laser, build_tower
+from consts import inferno1, inferno2, inferno3, inferno4, laser_tower, LANGUAGE, laser, build_tower, burning
 from other import distance, Vector
 
 
@@ -122,6 +122,7 @@ class InfernoTower:
             self.target_id = -1
             return
         # enemies[self.target_id].get_damage(self.damage // 60)
+        burning.play()
         enemies[self.target_id].burn_flag = True
         enemies[self.target_id].get_damage(self.damage / 60)
 

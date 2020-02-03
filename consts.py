@@ -16,6 +16,8 @@ btn_click = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds'
 
 build_tower = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'build.wav'))
 
+burning = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'burning.wav'))
+
 hp_texture = pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', 'cpu.png'))
 base_texture = pygame.transform.scale(
     pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', 'base.png')), (150, 100))
