@@ -1,3 +1,4 @@
+import os
 from os import environ
 
 from pygame import Color
@@ -21,6 +22,7 @@ screen_height = 720
 minimal_screen_width = 320
 minimal_screen_height = 240
 screen = pygame.display.set_mode((screen_width, screen_height), flags=DOUBLEBUF)
+pygame.display.set_caption('Tower Defence')
 clock = pygame.time.Clock()
 
 
@@ -30,8 +32,11 @@ def terminate():
 
 
 def menu() -> int:
+    pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'menu.aiff'))
+    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.play(100000)
     global screen, screen_width, screen_height
-    background = pygame.image.load('images/menu_background.jpg')
+    background = pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', 'menu_background.jpg'))
     out_state = 0
     objects = list()
 
@@ -124,6 +129,10 @@ def menu() -> int:
 
 
 def settings_menu():
+    pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'game.wav'))
+    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.play(100000)
+
     global screen, screen_width, screen_height
     x = 5
     objects = list()
@@ -222,7 +231,7 @@ def settings_menu():
 
 def death_screen():
     global screen, screen_width, screen_height
-    background = pygame.image.load('images/GAME_OVER.jpg')
+    background = pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', 'GAME_OVER.jpg'))
     flag = True
     while flag:
         screen.blit(pygame.transform.scale(background, (screen_width, screen_height)), (0, 0))

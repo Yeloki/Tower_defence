@@ -1,9 +1,10 @@
+import os
 from time import time as global_time
 
 from pygame.constants import *
 from pygame.draw import aaline
 
-from consts import base_texture, hp_texture, boom_map, boom_map2, STATUSES
+from consts import base_texture, hp_texture, boom_map, boom_map2, STATUSES, base_boom
 from enemy import Enemy
 from gui import *
 from other import Vector
@@ -14,6 +15,7 @@ from turrets import TOWERS, prototype, COSTS, ALL_TOWERS
 class BaseExplosion(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__()
+        base_boom.play()
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
@@ -244,6 +246,9 @@ class Game:
             self.all_turrets[self.focus_on].upgrade(type_of_update)
 
     def start(self, screen) -> (int, pygame.Surface):
+        pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'game.wav'))
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(100000)
         second = 30
         base_explosion = None
         clock = pygame.time.Clock()

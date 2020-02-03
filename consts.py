@@ -6,6 +6,14 @@ from other import rot_center
 
 used_font = 'bahnschrift'
 pygame.init()
+pygame.mixer.init()
+
+laser = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'laser.wav'))
+base_boom = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'base_boom.aif'))
+
+btn_click = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'button.aif'))
+
+build_tower = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'build.wav'))
 
 hp_texture = pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', 'cpu.png'))
 base_texture = pygame.transform.scale(

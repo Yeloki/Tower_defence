@@ -1,10 +1,9 @@
 import math
 from time import time
-
 import pygame
 
 from consts import used_font, NUMS, green_btn, green_clicked_btn, \
-    red_btn, red_clicked_btn, blue_clicked_btn, blue_btn, LANGUAGE
+    red_btn, red_clicked_btn, blue_clicked_btn, blue_btn, LANGUAGE, btn_click
 from turrets import TOWERS, COSTS
 
 
@@ -155,6 +154,7 @@ class PushButton:
             if self.collide(event.pos, fix_x, fix_y):
                 self.last_clicked_time = time()
                 self.clicked = True
+                btn_click.play()
                 return self.handler
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.flag = True

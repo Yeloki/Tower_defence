@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 
 import pygame
@@ -208,6 +209,11 @@ class MapCreator:
             del self.changes_stack[-1]
 
     def start(self, screen):
+
+        pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'game.wav'))
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(100000)
+
         out_state = 0
         self.menu = MapCreatorMenu()
         want_to_place_type = None
