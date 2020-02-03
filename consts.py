@@ -5,8 +5,9 @@ import pygame
 from other import rot_center
 
 used_font = 'bahnschrift'
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
-pygame.mixer.init()
+# pygame.mixer.init()
 
 laser = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'laser.wav'))
 base_boom = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'base_boom.aif'))

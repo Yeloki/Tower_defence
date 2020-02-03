@@ -15,6 +15,7 @@ class InfernoTower:
 
     def __init__(self, x, y) -> None:
         # damage
+        build_tower.play()
         self.damage = 240
 
         self.damage_update_cost = 40
@@ -365,7 +366,7 @@ class LaserTower:
             try:
                 vec = Vector(*self.pos(), *enemies[self.target_id].pos())
                 if vec.begin()[0] - vec.end()[0] == 0 and \
-                        vec.begin()[1] - vec.end()[1]< 0:
+                        vec.begin()[1] - vec.end()[1] < 0:
                     self.angle = 180 % 360
                 else:
                     k = 0
