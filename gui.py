@@ -3,7 +3,7 @@ from time import time
 import pygame
 
 from consts import used_font, NUMS, green_btn, green_clicked_btn, \
-    red_btn, red_clicked_btn, blue_clicked_btn, blue_btn, LANGUAGE, btn_click
+    red_btn, red_clicked_btn, blue_clicked_btn, blue_btn, LANGUAGE
 from turrets import TOWERS, COSTS
 
 
@@ -84,7 +84,7 @@ class PercentLabel:
         for size in range(1, 100):
             font = pygame.font.SysFont(used_font, size)
             for i, elem in enumerate(lines):
-                text = font.render(str(elem), 1, self.text_color)
+                text = font.render(str(elem), False, self.text_color)
                 max_height = max(text.get_height(), max_height)
                 max_width = max(text.get_width(), max_width)
             width = max_width + 10
@@ -110,7 +110,7 @@ class PercentLabel:
         lines = self.text.split('\n')
         font = pygame.font.SysFont(used_font, self.font_size)
         for i, line in enumerate(lines):
-            text = font.render(str(line), 1, self.text_color)
+            text = font.render(str(line), False, self.text_color)
             text_h = text.get_height()
             screen.blit(text,
                         (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
@@ -154,7 +154,6 @@ class PushButton:
             if self.collide(event.pos, fix_x, fix_y):
                 self.last_clicked_time = time()
                 self.clicked = True
-                btn_click.play()
                 return self.handler
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.flag = True
@@ -184,7 +183,7 @@ class PushButton:
         for size in range(1, 100):
             font = pygame.font.SysFont(used_font, size)
             for i, elem in enumerate(lines):
-                text = font.render(str(elem), 1, self.text_color)
+                text = font.render(str(elem), False, self.text_color)
                 max_height = max(text.get_height(), max_height)
                 max_width = max(text.get_width(), max_width)
             width = max_width + 10
@@ -225,7 +224,7 @@ class PushButton:
         lines = self.text.split('\n')
         font = pygame.font.SysFont(used_font, self.font_size)
         for i, line in enumerate(lines):
-            text = font.render(str(line), 1, self.text_color)
+            text = font.render(str(line), False, self.text_color)
             text_w = text.get_width()
             text_h = text.get_height()
             screen.blit(text,

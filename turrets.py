@@ -5,7 +5,7 @@ from pygame import Color, Surface
 from pygame.draw import circle
 from pygame.locals import *
 
-from consts import inferno1, inferno2, inferno3, inferno4, laser_tower, LANGUAGE, laser, build_tower
+from consts import inferno1, inferno2, inferno3, inferno4, laser_tower, LANGUAGE
 from other import distance, Vector
 
 
@@ -15,7 +15,6 @@ class InfernoTower:
 
     def __init__(self, x, y) -> None:
         # damage
-        build_tower.play()
         self.damage = 240
 
         self.damage_update_cost = 40
@@ -192,7 +191,6 @@ class LaserTower:
 
     def __init__(self, x, y):
         # damage
-        build_tower.play()
         self.damage = 60
         self.damage_update_cost = 20
         self.damage_update_value = 60
@@ -281,7 +279,6 @@ class LaserTower:
         if time() - self.last_shoot_time >= 10 / self.rate:
             self.last_shoot_time = time()
             self.shoot_flag = True
-            laser.play()
             enemies[self.target_id].get_damage(self.damage)
             enemies[self.target_id].freeze(self.freezing_time / 10)
 

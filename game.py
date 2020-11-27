@@ -4,7 +4,7 @@ from time import time as global_time
 from pygame.constants import *
 from pygame.draw import aaline
 
-from consts import base_texture, hp_texture, boom_map, boom_map2, STATUSES, base_boom
+from consts import base_texture, hp_texture, boom_map, boom_map2, STATUSES
 from enemy import Enemy
 from gui import *
 from other import Vector
@@ -15,7 +15,6 @@ from turrets import TOWERS, prototype, COSTS, ALL_TOWERS
 class BaseExplosion(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__()
-        base_boom.play()
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
@@ -78,7 +77,8 @@ class GameMap:
         screen_width, screen_height = screen.get_width(), screen.get_height()
         screen.blit(pygame.transform.scale(self.background, (screen_width, screen_height)), (0, 0))
         for vec in self.game_map:
-            draw_better_line(screen, vec.begin(), vec.end(), pygame.Color(0, 62, 141), self.line_width)
+            draw_better_line(screen, vec.begin(), vec.end(), pygame.Color(0, 62, 141),
+                             self.line_width)
         for dot in self.dots:
             pygame.draw.circle(screen, pygame.Color(0, 62, 141), dot, self.line_width)
         if base_hp > 0:
@@ -199,7 +199,8 @@ class Game:
 
     def enemies_sender(self, ev_id):
         self.wave_queue[ev_id][1] -= 1
-        self.all_enemies_on_map[self.enemy_id] = Enemy(self.game_map.get_map(), wave=ev_id, difficult=self.difficult)
+        self.all_enemies_on_map[self.enemy_id] = Enemy(self.game_map.get_map(), wave=ev_id,
+                                                       difficult=self.difficult)
         self.enemy_id = (self.enemy_id + 1) % 100000
         if self.wave_queue[ev_id][1] == 0:
             del self.wave_queue[ev_id]
@@ -249,7 +250,7 @@ class Game:
         pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'game.wav'))
         pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play(100000)
-        second = 30
+        second = pygame.USEREVENT
         base_explosion = None
         clock = pygame.time.Clock()
         pygame.time.set_timer(second, 1000)
@@ -303,11 +304,13 @@ class Game:
                             flag = False
                             break
                     if flag:
+                        print(*self.menu.rect)
 
-                        collision_x = event.pos[0] in range(self.menu.rect[0],
-                                                            self.menu.rect[2] + self.menu.rect[0] + 1)
-                        collision_y = event.pos[1] in range(self.menu.rect[1],
-                                                            self.menu.rect[3] + self.menu.rect[1] + 1)
+                        collision_x = (self.menu.rect[0] <= event.pos[0] <= self.menu.rect[2] +
+                                       self.menu.rect[0])
+
+                        collision_y = (self.menu.rect[1] <= event.pos[1] <= self.menu.rect[3] +
+                                       self.menu.rect[1])
 
                         if not (collision_x and collision_y):
                             self.focus_on = None
@@ -367,8 +370,11 @@ class Game:
                                          want_to_build_type,
                                          screen))
             if self.base_hp <= 0 and base_explosion is None:
-                base_explosion = BaseExplosion(boom_map2, 9, 9, self.game_map.base.x, self.game_map.base.y)
-                # base_explosion = BaseExplosion(boom_map2, 9, 9, 0, 0)
+                base_explosion = BaseExplosion(boom_map2,
+                                               9,
+                                               9,
+                                               self.game_map.base.x,
+                                               self.game_map.base.y)
                 for tower_id in [__ for __, _ in self.all_turrets.items()]:
                     self.add_explosion(self.all_turrets[tower_id].pos())
                     del self.all_turrets[tower_id]

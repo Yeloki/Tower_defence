@@ -32,9 +32,9 @@ def terminate():
 
 
 def menu() -> int:
-    pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'menu.aiff'))
-    pygame.mixer.music.set_volume(0.1)
-    pygame.mixer.music.play(100000)
+    # pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'menu.aiff'))
+    # pygame.mixer.music.set_volume(0.5)
+    # pygame.mixer.music.play(100000)
     global screen, screen_width, screen_height
     background = pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', 'menu_background.jpg'))
     out_state = 0
@@ -114,6 +114,7 @@ def menu() -> int:
     for elem in objects:
         elem.set_rect(screen)
     while out_state == 0 or out_state is None:
+
         screen.blit(pygame.transform.scale(background, (screen_width, screen_height)), (0, 0))
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -130,7 +131,7 @@ def menu() -> int:
 
 def settings_menu():
     pygame.mixer.music.load(os.path.join(os.path.abspath(os.curdir), 'sounds', 'game.wav'))
-    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(100000)
 
     global screen, screen_width, screen_height

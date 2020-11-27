@@ -4,19 +4,19 @@ import pygame
 
 from other import rot_center
 
-used_font = 'bahnschrift'
-pygame.mixer.pre_init(44100, -16, 1, 512)
+used_font = "arial"
+# pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 # pygame.mixer.init()
 
-laser = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'laser.wav'))
-base_boom = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'base_boom.aif'))
-
-btn_click = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'button.aif'))
-
-build_tower = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'build.wav'))
-
-burning = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'burning.wav'))
+# laser = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'laser.wav'))
+# base_boom = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'base_boom.aif'))
+#
+# btn_click = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'button.aif'))
+#
+# build_tower = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'build.wav'))
+#
+# burning = pygame.mixer.Sound(os.path.join(os.path.abspath(os.curdir), 'sounds', 'burning.wav'))
 
 hp_texture = pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', 'cpu.png'))
 base_texture = pygame.transform.scale(
@@ -33,7 +33,7 @@ NUMS = dict()
 size = 18
 font = pygame.font.SysFont(used_font, size)
 for i in range(101):
-    NUMS[i] = font.render(str(i), 1, pygame.Color(255, 255, 255))
+    NUMS[i] = font.render(str(i), False, pygame.Color(255, 255, 255))
 
 inferno1 = pygame.transform.scale(
     pygame.image.load(os.path.join(os.path.abspath(os.curdir), 'images', '3.jpg')), (40, 40))
