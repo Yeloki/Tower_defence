@@ -1,32 +1,32 @@
 from pygame import transform
 
 
-class Vector:
+class Segment:
     def __init__(self, x1, y1, x2, y2):
-        self.x_begin, self.y_begin = x1, y1
-        self.x_end, self.y_end = x2, y2
+        self.x1, self.y1 = x1, y1
+        self.x2, self.y2 = x2, y2
         self.len_x = x2 - x1
         self.len_y = y2 - y1
-        self.vec_len = (self.len_x ** 2 + self.len_y ** 2) ** 0.5
+        self.seg_len = (self.len_x ** 2 + self.len_y ** 2) ** 0.5
 
     def len(self) -> int:
-        return self.vec_len
+        return self.seg_len
 
-    def begin(self) -> tuple:
-        return self.x_begin, self.y_begin
+    def a(self) -> tuple:
+        return self.x1, self.y1
 
-    def end(self) -> tuple:
-        return self.x_end, self.y_end
+    def b(self) -> tuple:
+        return self.x2, self.y2
 
 
 def distance(point1, point2):
     return abs(((point2[1] - point1[1]) ** 2 + (point2[0] - point1[0]) ** 2) ** 0.5)
 
 
-def near_point_on_vector(point, vec: Vector):
+def near_point_on_segment(point, vec: Segment):
     x, y = point
-    x1, y1 = vec.begin()
-    x2, y2 = vec.end()
+    x1, y1 = vec.a()
+    x2, y2 = vec.b()
     length = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
     pr = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)
     cf = pr / length
@@ -39,8 +39,8 @@ def near_point_on_vector(point, vec: Vector):
     return x_res, y_res
 
 
-def distance_to_vector(point, vec: Vector):
-    return distance(point, near_point_on_vector(point, vec))
+def distance_to_segment(point, vec: Segment):
+    return distance(point, near_point_on_segment(point, vec))
 
 
 def rot_center(image, angle):

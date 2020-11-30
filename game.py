@@ -7,8 +7,8 @@ from pygame.draw import aaline
 from consts import base_texture, hp_texture, boom_map, boom_map2, STATUSES
 from enemy import Enemy
 from gui import *
-from other import Vector
-from other import distance, distance_to_vector
+from other import Segment
+from other import distance, distance_to_segment
 from turrets import TOWERS, prototype, COSTS, ALL_TOWERS
 
 
@@ -68,7 +68,7 @@ class GameMap:
         self.base = self.Base(*tuple(map(int, file[0].split()))[:2])
         file = tuple(map(lambda x: tuple(map(int, x.split())), file[1:]))
         self.dots = [i for i in file]
-        self.game_map = [Vector(*file[i], *file[i + 1]) for i in range(len(file) - 1)]
+        self.game_map = [Segment(*file[i], *file[i + 1]) for i in range(len(file) - 1)]
 
     def get_map(self):
         return self.game_map
@@ -77,10 +77,10 @@ class GameMap:
         screen_width, screen_height = screen.get_width(), screen.get_height()
         screen.blit(pygame.transform.scale(self.background, (screen_width, screen_height)), (0, 0))
         for vec in self.game_map:
-            draw_better_line(screen, vec.begin(), vec.end(), pygame.Color(0, 62, 141),
+            draw_better_line(screen, vec.a(), vec.b(), pygame.Color(0, 62, 141),
                              self.line_width)
         for dot in self.dots:
-            pygame.draw.circle(screen, pygame.Color(0, 62, 141), dot, self.line_width)
+            pygame.draw.circle(screen, pygame.Color(0, 62, 141), [*dot], self.line_width)
         if base_hp > 0:
             self.base.update(screen, base_hp)
 
@@ -186,8 +186,8 @@ class Game:
             line = turret.update(screen, self.all_enemies_on_map)
             lines.append(line) if line is not None else None
         for line in lines:
-            draw_better_line(screen, line[0].begin(), line[0].end(), line[1][0], 2)
-            aaline(screen, line[1][1], line[0].begin(), line[0].end())
+            draw_better_line(screen, line[0].point1(), line[0].point2(), line[1][0], 2)
+            aaline(screen, line[1][1], line[0].point1(), line[0].point2())
 
     def next_wave_sender(self):
         self.current_wave += 1
@@ -214,8 +214,8 @@ class Game:
             return True
         test = []
         for vec in self.game_map.get_map():
-            test.append(distance_to_vector(pos, vec))
-            if distance_to_vector(pos, vec) - self.game_map.line_width <= r:
+            test.append(distance_to_segment(pos, vec))
+            if distance_to_segment(pos, vec) - self.game_map.line_width <= r:
                 return True
         x, y = pos
         if x + r in range(self.menu.rect[0], self.menu.rect[2] + self.menu.rect[0] + 1) and \

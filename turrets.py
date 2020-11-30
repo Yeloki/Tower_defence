@@ -6,7 +6,7 @@ from pygame.draw import circle
 from pygame.locals import *
 
 from consts import inferno1, inferno2, inferno3, inferno4, laser_tower, LANGUAGE
-from other import distance, Vector
+from other import distance, Segment
 
 
 class InfernoTower:
@@ -40,7 +40,7 @@ class InfernoTower:
         self.triggered = False
         self.target_id = -1
 
-    def update(self, screen, enemies) -> (None, (Vector, Color)):
+    def update(self, screen, enemies) -> (None, (Segment, Color)):
         surface = Surface((self.range_of_attack * 2, self.range_of_attack * 2), SRCALPHA)
         if self.triggered:
             circle(surface, Color(0, 255, 0, 25), (self.range_of_attack, self.range_of_attack), self.range_of_attack)
@@ -69,7 +69,7 @@ class InfernoTower:
 
         if self.target_id == -1 or self.target_id not in enemies:
             return
-        return Vector(*self.pos(), *enemies[self.target_id].pos()), colors[color_key]
+        return Segment(*self.pos(), *enemies[self.target_id].pos()), colors[color_key]
 
     # def description(self):
     #     return ''
@@ -353,7 +353,7 @@ class LaserTower:
     def sell(self):
         return self.summary_tower_cost // 2
 
-    def update(self, screen, enemies) -> (None, (Vector, Color)):
+    def update(self, screen, enemies) -> (None, (Segment, Color)):
         surface = Surface((self.range_of_attack * 2, self.range_of_attack * 2), SRCALPHA)
         if self.triggered:
             circle(surface, Color(0, 255, 0, 25), (self.range_of_attack, self.range_of_attack),
@@ -361,16 +361,16 @@ class LaserTower:
         colors = Color(117, 4, 157), Color(255, 212, 255)
         if self.target_id != -1 and self.target_id in enemies:
             try:
-                vec = Vector(*self.pos(), *enemies[self.target_id].pos())
-                if vec.begin()[0] - vec.end()[0] == 0 and \
-                        vec.begin()[1] - vec.end()[1] < 0:
+                vec = Segment(*self.pos(), *enemies[self.target_id].pos())
+                if vec.a()[0] - vec.b()[0] == 0 and \
+                        vec.a()[1] - vec.b()[1] < 0:
                     self.angle = 180 % 360
                 else:
                     k = 0
 
-                    tan = (vec.begin()[1] - vec.end()[1]) / (vec.begin()[0] - vec.end()[0])
-                    if ((vec.begin()[1] - vec.end()[1]) > 0 and (vec.begin()[0] - vec.end()[0]) > 0) or \
-                            ((vec.begin()[1] - vec.end()[1]) <= 0 < (vec.begin()[0] - vec.end()[0])):
+                    tan = (vec.a()[1] - vec.b()[1]) / (vec.a()[0] - vec.b()[0])
+                    if ((vec.a()[1] - vec.b()[1]) > 0 and (vec.a()[0] - vec.b()[0]) > 0) or \
+                            ((vec.a()[1] - vec.b()[1]) <= 0 < (vec.a()[0] - vec.b()[0])):
                         k = -180
                     self.angle = (90 + int(degrees(atan(tan))) + k) % 360
             except ZeroDivisionError:
@@ -382,7 +382,7 @@ class LaserTower:
         if self.target_id == -1 or self.target_id not in enemies or not self.shoot_flag:
             return
         self.shoot_flag = False
-        return Vector(*self.pos(), *enemies[self.target_id].pos()), colors
+        return Segment(*self.pos(), *enemies[self.target_id].pos()), colors
 
 
 if LANGUAGE == 'ENGLISH':

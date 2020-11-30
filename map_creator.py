@@ -7,7 +7,7 @@ from pygame.locals import *
 
 from consts import base_texture
 from gui import draw_better_line, MapCreatorMenu
-from other import Vector, distance, near_point_on_vector
+from other import Segment, distance, near_point_on_segment
 
 
 class MapCreator:
@@ -48,10 +48,10 @@ class MapCreator:
 
         def get_near_point_to_point(self, point):
             x_s, y_s = self.base_size  # x sie and y size
-            points = [near_point_on_vector(point, Vector(self.x, self.y, self.x + x_s, self.y)),
-                      near_point_on_vector(point, Vector(self.x + x_s, self.y, self.x + x_s, self.y + y_s)),
-                      near_point_on_vector(point, Vector(self.x + x_s, self.y + y_s, self.x, self.y + y_s)),
-                      near_point_on_vector(point, Vector(self.x, self.y + y_s, self.x, self.y))]
+            points = [near_point_on_segment(point, Segment(self.x, self.y, self.x + x_s, self.y)),
+                      near_point_on_segment(point, Segment(self.x + x_s, self.y, self.x + x_s, self.y + y_s)),
+                      near_point_on_segment(point, Segment(self.x + x_s, self.y + y_s, self.x, self.y + y_s)),
+                      near_point_on_segment(point, Segment(self.x, self.y + y_s, self.x, self.y))]
             min_dist = min(distance(point, i_point) for i_point in points)
             return {distance(point, i_point): i_point for i_point in points}[min_dist]
 
@@ -149,14 +149,14 @@ class MapCreator:
             if last_dot is None:
                 last_dot = dot
                 continue
-            vec = Vector(*last_dot.pos(), *dot.pos())
-            draw_better_line(surf, vec.begin(), vec.end(), Color(0, 62, 141, 100), self.line_width)
+            vec = Segment(*last_dot.pos(), *dot.pos())
+            draw_better_line(surf, vec.a(), vec.b(), Color(0, 62, 141, 100), self.line_width)
             last_dot = dot
         if len(tuple(self.dots.items())) >= 1 and self.base is not None:
             pos = tuple(self.dots.items())[-1][1].pos()
-            vec = Vector(*pos, *map(int, self.base.get_near_point_to_point(pos)))
-            draw_better_line(surf, vec.begin(), vec.end(), Color(0, 62, 141, 100), self.line_width)
-            self.Dot(*vec.end()).update(screen)
+            vec = Segment(*pos, *map(int, self.base.get_near_point_to_point(pos)))
+            draw_better_line(surf, vec.a(), vec.b(), Color(0, 62, 141, 100), self.line_width)
+            self.Dot(*vec.b()).update(screen)
         for _, dot in self.dots.items():
             dot.update(surf)
 
