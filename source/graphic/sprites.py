@@ -1,5 +1,7 @@
 import pygame
 from pygame import transform
+from .gui import BasePercentRect
+
 
 class BaseExplosion(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
@@ -23,6 +25,16 @@ class BaseExplosion(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
         surface.blit(self.image, self.rect)
         return self.cur_frame == ln - 1
+
+
+class Texture(BasePercentRect):
+    def __init__(self, x, y, width, height, path):
+        super(Texture, self).__init__(x, y, width, height)
+        self.img = pygame.image.load(path)
+
+    def render(self, screen_width, screen_height):
+        super(Texture, self).render(screen_width, screen_height)
+        self.surf.blit(pygame.transform.scale(self.img, (screen_width, screen_height)), (0, 0))
 
 
 def rot_center(image, angle):

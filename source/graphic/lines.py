@@ -1,5 +1,7 @@
 import math
 import pygame
+
+
 def draw_better_line(screen, point1, point2, color, width):
     x1, y1 = point1
     x2, y2 = point2

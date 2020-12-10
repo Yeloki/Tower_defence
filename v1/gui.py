@@ -110,7 +110,7 @@ class PercentLabel:
         lines = self.text.split('\n')
         font = pygame.font.SysFont(used_font, self.font_size)
         for i, line in enumerate(lines):
-            text = font.render(str(line), False, self.text_color)
+            text = font.render(str(line), True, self.text_color)
             text_h = text.get_height()
             screen.blit(text,
                         (self.rect[0] + 5, self.rect[1] + (text_h - self.rect[4]) * i))
@@ -224,7 +224,7 @@ class PushButton:
         lines = self.text.split('\n')
         font = pygame.font.SysFont(used_font, self.font_size)
         for i, line in enumerate(lines):
-            text = font.render(str(line), False, self.text_color)
+            text = font.render(str(line), True, self.text_color)
             text_w = text.get_width()
             text_h = text.get_height()
             screen.blit(text,

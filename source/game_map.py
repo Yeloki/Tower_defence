@@ -1,6 +1,6 @@
-from consts import *
+
 from pygame.locals import *
-from gui import *
+
 from .geometry.base import *
 import json
 

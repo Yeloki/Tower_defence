@@ -22,7 +22,7 @@ screen_height = 720
 minimal_screen_width = 320
 minimal_screen_height = 240
 screen = pygame.display.set_mode((screen_width, screen_height), flags=DOUBLEBUF)
-pygame.display.set_caption('Tower Defence')
+pygame.display.set_caption('Tower Defence by FNC')
 clock = pygame.time.Clock()
 
 
