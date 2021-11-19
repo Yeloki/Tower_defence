@@ -348,8 +348,6 @@ class LaserTower:
                           ),
                          out, out2))
 
-    # def description(self):
-    #     return ''
     def sell(self):
         return self.summary_tower_cost // 2
 

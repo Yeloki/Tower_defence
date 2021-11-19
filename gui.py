@@ -159,8 +159,8 @@ class PushButton:
             self.flag = True
 
     def collide(self, mouse_pos, fix_x=0, fix_y=0):
-        return mouse_pos[0] in range(self.rect[0] + fix_x, self.rect[2] + self.rect[0] + fix_x) and \
-               mouse_pos[1] in range(self.rect[1] + fix_y, self.rect[3] + self.rect[1] + fix_y)
+        return self.rect[0] + fix_x <= mouse_pos[0] <= self.rect[2] + self.rect[0] + fix_x and \
+               self.rect[1] + fix_y <= mouse_pos[1] <= self.rect[3] + self.rect[1] + fix_y
 
     def set_style(self, image):
         if self.rect is not None:
